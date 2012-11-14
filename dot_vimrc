@@ -1,130 +1,92 @@
-set history=50            " keep 50 lines of command line history
-set undofile              " use an undo file
-set undodir=~/.vimundo/   " store an undo history
-set undolevels=1000       " max number of changes that can be undone
-set hidden                " allow for the buffer to be hidden
-set showcmd               " Show (partial) command in status line.
-set showmatch             " Show matching brackets.
-set mat=2                 " how many tenths of a second to blink when matching brackets
-set wildmenu              " This is used with wildmode(full) to cycle options
-set wildmode=list:longest,full               " list all options, match to the longest
-set scrolloff=5           " move the cursor 5 lines before hte border
+" ========== General Config ==========
 
-" Turn backup off
-set nobackup
-set nowb
-set noswapfile
-
-set visualbell
-
-"don't automatically spell check!
-let spell_auto_type=""
-
-" Use all VIM features
+" use vim settings rather than vi
+" This needs to be first because it changes other options as a side affect
 set nocompatible
 
-" Use horizontal scrollbar
-set guioptions+=b
+let spell_auto_type=""              " don't automatically spell check
+set history=1000                    " set a command history
+set hidden                          " allow for buffer to be hidden
+set clipboard+=unnamed              " share clipboard
+set visualbell                      " no sounds
+set viminfo^=%                      " remember info about buffers on close
+set nowrap                          " turn off word wrap by default (do "set wrap" to turn it on again, or remove this line)
+set ignorecase                      " ignores casing by default
+set smartcase                       " only respects casing when it's used in searching
+set noequalalways                   " don't resize splits when a buffer is closed
+set backspace=2                     " use nice backspacing
+set incsearch                       " turn on incremental search
+set mouse=a                         " enable the mouse at all times
 
-" Activate folding of blocks of code
-set foldmethod=indent
+" ========== UI Customizations ==========
+syntax on                           " turn on syntax highlighting
+set showcmd                         " show (partial) command in status line
+set guioptions+=                    " use horizontal scrollbar
+set winminheight=0                  " min height of a split window
+set hlsearch                        " enable search highlighting
 
-" Show treeview of the top 6 levels of folding
-"set foldcolumn=6
-set foldlevel=100
+" scrolling options
+set scrolloff=5                     " start scrolling a few lines away from margins
+set sidescrolloff=15
+set sidescroll=1
 
-" Share clipboard
-set clipboard+=unnamed
+" bracket maching options
+set showmatch
+set mat=2
 
-" "When editing a file, make screen display the name of the file you are editing
-function! SetTitle()
-  if $TERM =~ "^screen"
-    let l:title = 'vi: ' . expand('%:t')
+" status line style
+set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ Line:\ %l,%c
 
-    if (l:title != 'vi: __Tag_List__')
-      let l:truncTitle = strpart(l:title, 0, 15)
-      silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'
-    endif
-  endif
-endfunction
-
-" Turn on syntax highlighting
-syntax on
-
-" Turn on vim's ability to recognize different types of files, and use custom
-" highlighters and indentation for them (e.g. for a Ruby files versus a C#
-" file)
-filetype plugin on
-filetype indent on
-
-" Set the font to a nice readable font if this is gvim, and
-" set the colourscheme to a nice readable colourscheme if it's just vim
-" if v:progname == 'gvim'
-"     set guifont=Lucida_Console:h12:cANSI
-" endif
-" set guifont=Lucida_Console:h12:cANSI
-
-" Turn off word wrap by default (do "set wrap" to turn it on again, or remove this line)
-set nowrap
-
-"Ignore case
-set ignorecase
-
-"ignore case when lowercase
-set smartcase
-
-" Set the width of tabs to 4
-set tabstop=4
-set autoindent
-set smartindent
-set expandtab
-set softtabstop=4
-set shiftwidth=4
-
-" Don't resize splits when a buffer is closed
-set noequalalways
-
-" Helpful navigation keys
-nmap W <C-W>_                " W  - Maximize the current split
-
-" Set the minimum height of a split window
-set winminheight=0
-
-" Turn on incremental search
-set incsearch
-
-" Use the nice backspacing
-set backspace=2
-
-" Set up the ruler bar so it shows us helpful information
+" ruler bar
 set formatoptions+=roc
 set laststatus=2
 set ruler
-set hls
 
-" don't insert comment automatically on new line
-autocmd BufRead,BufNewFile * set formatoptions-=cro
+" highlight color options
+highlight Pmenu ctermbg=238 gui=bold
 
-"map ctrl-e to edit the current file in perforce
-nmap <C-E> :!p4 edit %<CR>:e<CR>
+" ========== Completion Options ==========
+set wildmenu
+set wildmode=list:longest,full
 
-"map ctrl c to yank to the buffer
-map <C-c> "*y<CR>
-map <C-x> "*x<CR>
+" stuff to ignore when doing tab completions
+set wildignore=*.o,*.obj,*~
+set wildignore+=*vim/backups*
+set wildignore+=*.swp*
+set wildignore+=*DS_Store*
+set wildignore+=*.png,*.jpg,*.jpeg,*.gif
 
-" make the mouse enabled at all times
-set mouse=a
+" ========== Persistent Undo ==========
+" keep undo history across sessions
 
-" highlight search
-set hlsearch
+silent !mkdir ~/.vim/backups > /dev/null 2>&1
+set undofile
+set undodir=~/.vim/backups
+set undolevels=1000
 
-" highlight trailing whitespaces and also tab characters
- highlight ExtraWhitespace ctermbg=grey guibg=grey
+" ========== Turn off swap files ==========
+set nobackup
+set nowritebackup
+set noswapfile
 
-" match ExtraWhitespace /\s\+$\|\t/
- autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/
- autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
- autocmd InsertLeave * match ExtraWhitespace /\s\+$\|\t/
+" ========== Folding ==========
+set foldmethod=indent                   " fold based on indent
+set foldlevel=100
+
+" ========== Indentation ==========
+" Turn on vim's ability to recognize different types of files, and use custom
+" highlighters and indentation for them
+filetype plugin indent on
+
+set autoindent
+set smartindent
+set expandtab
+set smarttab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+
+" ========== Auto Complete ==========
 
 " enable java autocomplete (omnicomplete)
 " Only do this part when compiled with support for autocommands.
@@ -134,48 +96,10 @@ if has("autocmd")
     call javacomplete#SetSearchdeclMethod(4)
     set ofu=syntaxcomplete#Complete
     set completeopt=longest,menuone
-    "call javacomplete#AddSourcePath('.')
 endif
 
+" ========== Tags ==========
 set tags=.tags
-
-" set tab to invoke the autocomplete menu
-let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
-let g:SuperTabDefaultCompletionType = "context"
-
-" change mapping of the enter key so it behaves nicely with autocomplete
-inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
-  \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
-inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
-  \ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
-inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
-inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
-
-" make the colors look nice
-highlight Pmenu ctermbg=238 gui=bold
-
-"" nerdtree
-" source /apollo/env/envImprovement/vim/plugin/NERD_tree.vim
-" nmap <C-T> :NERDTree .<CR>
-
-au BufNewFile,BufRead *.mi set syntax=mason
-au BufNewFile,BufRead *.ion set syntax=ion
-
-" Return to last edit position when opening files (You want this!)
-autocmd BufReadPost *
-     \ if line("'\"") > 0 && line("'\"") <= line("$") |
-     \   exe "normal! g`\"" |
-     \ endif
-" Remember info about open buffers on close
-set viminfo^=%
-
-" Always show the status line
-set laststatus=2
-
-" format the status line
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ Line:\ %l,%c
 
 " regenerate tags when F12 is pressed
 nmap <F12> :!ctags -R -h java -f .tags ./src<CR>
@@ -183,32 +107,29 @@ nmap <F12> :!ctags -R -h java -f .tags ./src<CR>
 " goto the next tag
 nmap <C-n> :tnext<CR>
 
-" enable auto bracketing
-" autocmd Filetype java imap ( ()<left>
-" function! My_BracketComplete()
-"     let char = strpart(getline('.'), col('.')-1, 1)
-"     if (char == ")")
-"         return "\<Right>"
-"     else
-"         return ")"
-"     endif
-" endfunction
-" autocmd FileType java inoremap ) <C-R>=My_BracketComplete()<CR>
+" ========== Mappings ==========
 
-"autocmd Filetype java imap { {}<left><cr><cr><up><tab>
-"function! My_BraceComplete()
-"    let char = strpart(getline('.'), col('.')-1, 1)
-"    if (char == ")")
-"        return "\<Right>"
-"    else
-"        return "}"
-"    endif
-"endfunction
-"autocmd FileType java inoremap } <C-R>=My_BraceComplete()<CR>
+"map ctrl-e to edit the current file in perforce
+nmap <C-E> :!p4 edit %<CR>:e<CR>
 
-" removes all trailing whitespace and tabs when write is issued
-autocmd BufWritePre * :%s/\s\+$//ge
-autocmd BufWritePre * :%s/\t/    /ge
+"map ctrl c to yank to the buffer
+map <C-c> "*y<CR>
+map <C-x> "*x<CR>
+
+" set tab to invoke the autocomplete menu
+let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
+let g:SuperTabDefaultCompletionType = "context"
+
+" change mapping of the enter key so it behaves nicely with autocomplete
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
+  \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
+  \ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
+inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
+
+" ========== Functions ==========
 
 " Returns true if paste mode is enabled
 function! HasPaste()
@@ -217,3 +138,42 @@ function! HasPaste()
     en
     return ''
 endfunction
+
+" re-enable removal of whitespaces and tabs from a file
+function! SetErase()
+    augroup extraSpaceGroup
+        autocmd BufWritePre * :%s/\s\+$//ge
+        autocmd BufWritePre * :%s/\t/    /ge
+    augroup END
+endfunction
+
+" disable removing whitespaces and tabs from a file
+function! NoErase()
+    autocmd! extraSpaceGroup
+endfunction
+
+" Assign :SE and :NE to SetErase and NoErase respectively
+command! -range -nargs=* SE <line1>,<line2> call SetErase()
+command! -range -nargs=* NE <line1>,<line2> call NoErase()
+
+" ========== Special Customizations ==========
+
+autocmd BufRead,BufNewFile * set formatoptions-=cro     " don't insert comment automatically on new line
+
+" match ExtraWhitespace /\s\+$\|\t/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$\|\t/
+
+" Return to last edit position when opening files
+autocmd BufReadPost *
+     \ if line("'\"") > 0 && line("'\"") <= line("$") |
+     \   exe "normal! g`\"" |
+     \ endif
+
+" highlight trailing whitespaces and also tab characters
+highlight ExtraWhitespace ctermbg=grey guibg=grey
+
+" enable removal of whitespaces and tabs from the file (disable by calling :NE
+" and reenable by calling :SE
+call SetErase()

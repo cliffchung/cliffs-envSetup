@@ -37,3 +37,17 @@ alias rgrep='grep -r'
 alias cl='clear'
 alias wp='cd ~/workplace/'
 alias tags='ctags -R --language-force=java -f .tags ./src'
+
+#####################
+# Mac Specific Stuff
+#####################
+
+if [[ $OSTYPE =~ "darwin" ]]
+then
+    # enable coloring in terminal
+    export CLICOLOR=1
+    export LSCOLORS=FxFxCxDxBxegedabagacad
+
+    alias gvim='open -a MacVim.app'
+    alias ecl='/Applications/eclipse/eclipse&'
+fi

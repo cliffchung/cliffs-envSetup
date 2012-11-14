@@ -1,0 +1,5 @@
+[core]
+    editor = vim
+    pager = less -R
+[color]
+    ui = true

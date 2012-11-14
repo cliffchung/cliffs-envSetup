@@ -4,6 +4,11 @@
 
 # bind ctrl + w to backwards delete one word
 bind '"\C-w"':'""'
+bind '""':'"B"'
+bind '""':'"F"'
+
+# make tab do auto completion
+bind TAB:menu-complete
 
 #################
 # Useful settings

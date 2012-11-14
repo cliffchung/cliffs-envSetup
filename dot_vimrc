@@ -93,13 +93,13 @@ set shiftwidth=4
 if has("autocmd")
     autocmd Filetype java setlocal omnifunc=javacomplete#Complete
     setlocal completefunc=javacomplete#CompleteParamsInfo
-    call javacomplete#SetSearchdeclMethod(4)
-    set ofu=syntaxcomplete#Complete
-    set completeopt=longest,menuone
+    " nicer autocomplete
+    inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
+    inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
 endif
 
 " ========== Tags ==========
-set tags=.tags
+set tags=.tags;~/.vim/tags
 
 " regenerate tags when F12 is pressed
 nmap <F12> :!ctags -R -h java -f .tags ./src<CR>
@@ -117,7 +117,6 @@ map <C-c> "*y<CR>
 map <C-x> "*x<CR>
 
 " set tab to invoke the autocomplete menu
-let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
 let g:SuperTabDefaultCompletionType = "context"
 
 " ========== Functions ==========

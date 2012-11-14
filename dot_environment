@@ -50,4 +50,5 @@ then
 
     alias gvim='open -a MacVim.app'
     alias ecl='/Applications/eclipse/eclipse&'
+    alias netstat="sudo lsof -i -P"
 fi

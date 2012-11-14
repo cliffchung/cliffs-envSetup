@@ -1,5 +1,6 @@
 [core]
     editor = vim
     pager = less -R
+    excludesfile = ~/.gitignore
 [color]
-    ui = true
+    ui = auto

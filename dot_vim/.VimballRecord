@@ -1,2 +1,0 @@
-supertab.vba: call delete('/home/ctschung/.vim/doc/supertab.txt')|call delete('/home/ctschung/.vim/plugin/supertab.vim')
-Align.vba: call delete('/rhel5pdi/home/ctschung/.vim/plugin/AlignPlugin.vim	[[[1')|call delete('/rhel5pdi/home/ctschung/.vim/plugin/AlignMapsPlugin.vim	[[[1')|call delete('/rhel5pdi/home/ctschung/.vim/plugin/cecutil.vim	[[[1')|call delete('/rhel5pdi/home/ctschung/.vim/doc/Align.txt	[[[1')|call delete('/rhel5pdi/home/ctschung/.vim/autoload/Align.vim	[[[1')|call delete('/rhel5pdi/home/ctschung/.vim/autoload/AlignMaps.vim	[[[1')

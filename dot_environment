@@ -1,0 +1,39 @@
+#################
+# Bindings
+#################
+
+# bind ctrl + w to backwards delete one word
+bind '"\C-w"':'""'
+
+#################
+# Useful settings
+#################
+
+# corrects typos
+shopt -s cdspell
+
+shopt -s cdable_vars
+shopt -s sourcepath
+shopt -s no_empty_cmd_completion
+shopt -s cmdhist
+shopt -s nocaseglob
+
+#################
+# Aliases
+#################
+
+# Bash aliases
+alias echo="echo -e" # allows for backslash escaped characters
+alias cd='pushd . > /dev/null; cd'
+
+# Standard aliases
+alias u='cd ../'
+alias uu='cd ../../'
+alias uuu='cd ../../../'
+alias uuuu='cd ../../../../'
+alias uuuuu='cd ../../../../../'
+alias ll='ls -lah'
+alias rgrep='grep -r'
+alias cl='clear'
+alias wp='cd ~/workplace/'
+alias tags='ctags -R --language-force=java -f .tags ./src'

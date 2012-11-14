@@ -1,0 +1,98 @@
+# zsh interactive startup
+
+#Enviroment Variables for Perforce
+export P4PORT=perforce:9591
+export P4CONFIG=.p4config
+
+# use emacs bindings, even though we set EDITOR to vi
+bindkey -e
+
+limit coredumpsize 0
+
+setopt NO_NOMATCH
+setopt AUTO_RESUME
+setopt NOTIFY
+setopt NO_PROMPT_CR
+
+#Keep the terminal history around
+setopt APPEND_HISTORY
+
+MAILCHECK=90000 # never
+
+######################### zsh options ################################
+setopt ALWAYS_TO_END           # Push that cursor on completions.
+setopt AUTO_NAME_DIRS          # change directories  to variable names
+setopt AUTO_PUSHD              # push directories on every cd
+setopt NO_BEEP                 # self explanatory
+
+DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
+
+######################### history options ############################
+setopt EXTENDED_HISTORY        # store time in history
+setopt HIST_EXPIRE_DUPS_FIRST  # unique events are more usefull to me
+setopt HIST_VERIFY         # Make those history commands nice
+setopt INC_APPEND_HISTORY      # immediatly insert history into history file
+HISTSIZE=15000                 # spots for duplicates/uniques
+SAVEHIST=15000                 # unique events guarenteed
+HISTFILE=~/.history
+FIGNORE=".o:~"
+WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+
+##################################
+#Display the path in the title bar
+##################################
+case $TERM in
+    xterm*)
+        precmd () {print -Pn "\e]0;%n@%m: %5C\a"}
+        ;;
+esac
+
+######################################
+#End Display the path in the title bar
+######################################
+# prompt stuff
+PROMPT="[%C] % "
+
+stty echoe
+if [[ -x /bin/arch && `arch` = "i686" ]] {
+   stty erase 127
+}
+
+# Command completion for network commands
+
+#hosts=(somehost.someplace.com)
+hostcmds=(rlogin rcp) # zsh knows about telnet, ftp, etc
+compctl -v setenv
+compctl -K module_complete cdm
+compctl -K bz_module_complete cdb
+
+# Command completion for MH folder-based commands
+# set -A fds `cd ~/Mail; ls -d [a-zA-Z]*[a-zA-z] | sed 's/^/+/'`
+# compctl -k fds refile folders
+
+zstyle ':completion:*' completer _expand _complete _approximate
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-prompt '%SAt %p: Hit TAB for more, or the character to insert%s'
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'r:|[._-]=** r:|=**' 'l:|=* r:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*' use-compctl true
+
+autoload -U compinit
+compinit
+
+#Setup color
+alias xred='xterm -vb -bg #660000 -fg #ffffff -T RED -geometry 100x52&'
+alias xgreen='xterm -vb -bg #006600 -fg #ffffff -T -GREEN -fn courier -geometry 100x52&'
+alias xblue='xterm -vb -bg #000055 -fg #ffffff -T BLUE -fn courier -geometry 100x52&'
+alias xwhite='xterm -vb -bg #FFFFCC -fg #2F4F4F -T WHITE -fn courier -geometry 100x52&'
+alias wterm='gnome-terminal --disable-sound --foreground=#000000 --background=#FFFAF0 --title=GnomeWhite &'
+alias gterm='gnome-terminal --disable-sound --foreground=#ffffff --background=#2F4F4F --title=GnomeGreen &'
+alias bterm='gnome-terminal --disable-sound --foreground=#ffffff --background=#000080 --title=GnomeBlue &'
+
+source ~/.environment
+
+bindkey "^R" history-incremental-search-backward
+bindkey "^E" end-of-line
+bindkey "^A" beginning-of-line
+bindkey "^T" push-line-or-edit

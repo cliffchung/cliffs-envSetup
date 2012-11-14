@@ -1,0 +1,7 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =5
+let g:netrw_dirhist_1='/rhel5pdi/brazil-pkg-cache/packages/HappyTrails/HappyTrails-3.1.1912.47/RHEL5_64/DEV.STD.PTHREAD/build/bin'
+let g:netrw_dirhist_2='/rhel5pdi/workplace/ctschung-aurummetrics/src/AurumDAntFiles/build'
+let g:netrw_dirhist_3='/rhel5pdi/workplace/ctschung-aurummetrics/src/AurumDScriptFiles/build'
+let g:netrw_dirhist_4='/rhel5pdi/workplace/ctschung-aurumcon/src/AurumDConStorage/bin'
+let g:netrw_dirhist_5='/rhel5pdi/home/ctschung/tmp'

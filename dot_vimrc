@@ -35,11 +35,11 @@ set showmatch
 set mat=2
 
 " status line style
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ Line:\ %l,%c
+set laststatus=2
+set statusline=\ %f%m%r%h\ %w\ \ Line:\ %l,%c
 
 " ruler bar
 set formatoptions+=roc
-set laststatus=2
 set ruler
 
 " highlight color options
@@ -117,14 +117,6 @@ map <C-x> "*x<CR>
 let g:SuperTabDefaultCompletionType = "context"
 
 " ========== Functions ==========
-
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    en
-    return ''
-endfunction
 
 " re-enable removal of whitespaces and tabs from a file
 function! SetErase()

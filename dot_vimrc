@@ -17,6 +17,7 @@ set noequalalways                   " don't resize splits when a buffer is close
 set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
+set nojoinspaces                    " when using join don't add spaces
 
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting
@@ -24,6 +25,8 @@ set showcmd                         " show (partial) command in status line
 set guioptions+=                    " use horizontal scrollbar
 set winminheight=0                  " min height of a split window
 set hlsearch                        " enable search highlighting
+set background=light                " sets the background color
+set t_Co=256                        " set the terminal color to 256
 
 " scrolling options
 set scrolloff=5                     " start scrolling a few lines away from margins
@@ -35,11 +38,14 @@ set showmatch
 set mat=2
 
 " status line style
-set laststatus=2
-set statusline=\ %f%m%r%h\ %w\ \ Line:\ %l,%c
+set statusline=\ %{HasPaste()}%f%m%r%h\ %w\ \ Line:\ %l,%c
+
+" title style
+set titlestring=%F%m%r
 
 " ruler bar
 set formatoptions+=roc
+set laststatus=2
 set ruler
 
 " highlight color options
@@ -116,7 +122,21 @@ map <C-x> "*x<CR>
 " set tab to invoke the autocomplete menu
 let g:SuperTabDefaultCompletionType = "context"
 
+" mapping to move between tabs
+nmap <C-Left> :tabprevious<CR>
+nmap <C-Right> :tabnext<CR>
+nmap <silent> <A-Left> :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
+nmap <silent> <A-Right> :execute 'silent! tabmove ' . tabpagenr()<CR>
+
 " ========== Functions ==========
+
+" Returns true if paste mode is enabled
+function! HasPaste()
+    if &paste
+        return 'PASTE MODE  '
+    en
+    return ''
+endfunction
 
 " re-enable removal of whitespaces and tabs from a file
 function! SetErase()
@@ -178,3 +198,4 @@ highlight ExtraWhitespace ctermbg=grey guibg=grey
 " enable removal of whitespaces and tabs from the file (disable by calling :NE
 " and reenable by calling :SE
 call SetErase()
+

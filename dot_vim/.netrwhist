@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/mnt/vg1.home/ctschung/Downloads/binaries/AutomationService/Automated Performance and Logs/Run Through 2014-03-19 17-30-57'
+let g:netrw_dirhist_2='/mnt/vg1.home/ctschung/Downloads/binaries/AutomationService/Automated Performance and Logs/Run Through 2014-03-19 18-15-53'
+let g:netrw_dirhist_3='/mnt/vg1.home/ctschung/workplace/ctschung-duke-eng/vendor/amazon/framework'
+let g:netrw_dirhist_4='/mnt/vg1.home/ctschung/workplace/ctschung-duke-eng/vendor/amazon'
+let g:netrw_dirhist_5='/mnt/vg1.home/ctschung/workplace/ctschung-duke/packages/apps/AmazonSettings/src/com/android/settings'
+let g:netrw_dirhist_6='/mnt/vg1.home/ctschung/workplace/ctschung-duke/out'
+let g:netrw_dirhist_7='/mnt/vg1.home/ctschung/workplace/ctschung-contacts/projects/Contacts/Smith/manifests'

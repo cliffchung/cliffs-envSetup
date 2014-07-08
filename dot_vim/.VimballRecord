@@ -1,0 +1,2 @@
+javacomplete.vba: call delete('/home/ctschung/.vim/doc/javacomplete.txt')|call delete('/home/ctschung/.vim/autoload/java_parser.vim')|call delete('/home/ctschung/.vim/autoload/Reflection.java')|call delete('/home/ctschung/.vim/autoload/javacomplete.vim')
+findmanifest.vba: call delete('/home/ctschung/.vim/doc/java.txt')|call delete('/home/ctschung/.vim/after/ftplugin/java.vim')

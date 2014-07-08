@@ -17,6 +17,7 @@ set noequalalways                   " don't resize splits when a buffer is close
 set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
+set nojoinspaces                    " when using join don't add spaces
 
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting
@@ -24,6 +25,8 @@ set showcmd                         " show (partial) command in status line
 set guioptions+=                    " use horizontal scrollbar
 set winminheight=0                  " min height of a split window
 set hlsearch                        " enable search highlighting
+set background=light                " sets the background color
+set t_Co=256                        " set the terminal color to 256
 
 " scrolling options
 set scrolloff=5                     " start scrolling a few lines away from margins
@@ -35,7 +38,10 @@ set showmatch
 set mat=2
 
 " status line style
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ Line:\ %l,%c
+set statusline=\ %{HasPaste()}%f%m%r%h\ %w\ \ Line:\ %l,%c
+
+" title style
+set titlestring=%F%m%r
 
 " ruler bar
 set formatoptions+=roc
@@ -109,15 +115,18 @@ nmap <C-n> :tnext<CR>
 
 " ========== Mappings ==========
 
-"map ctrl-e to edit the current file in perforce
-nmap <C-E> :!p4 edit %<CR>:e<CR>
-
 "map ctrl c to yank to the buffer
 map <C-c> "*y<CR>
 map <C-x> "*x<CR>
 
 " set tab to invoke the autocomplete menu
 let g:SuperTabDefaultCompletionType = "context"
+
+" mapping to move between tabs
+nmap <C-Left> :tabprevious<CR>
+nmap <C-Right> :tabnext<CR>
+nmap <silent> <A-Left> :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
+nmap <silent> <A-Right> :execute 'silent! tabmove ' . tabpagenr()<CR>
 
 " ========== Functions ==========
 
@@ -146,6 +155,28 @@ endfunction
 command! -range -nargs=* SE <line1>,<line2> call SetErase()
 command! -range -nargs=* NE <line1>,<line2> call NoErase()
 
+" smooth scrolling
+function SmoothScroll(up)
+    if a:up
+        let scrollaction="\<C-Y>"
+    else
+        let scrollaction="\<C-E>"
+    endif
+    exec "norm " . scrollaction
+    redraw
+    let counter=1
+    while counter<&scroll
+        let counter+=1
+        sleep 10m
+        redraw
+        exec "norm " . scrollaction
+    endwhile
+endfunction
+nnoremap <C-U> :call SmoothScroll(1)<Enter>
+nnoremap <C-D> :call SmoothScroll(0)<Enter>
+inoremap <C-U> <Esc>:call SmoothScroll(1)<Enter>i
+inoremap <C-D> <Esc>:call SmoothScroll(0)<Enter>i
+
 " ========== Special Customizations ==========
 
 autocmd BufRead,BufNewFile * set formatoptions-=cro     " don't insert comment automatically on new line
@@ -167,3 +198,4 @@ highlight ExtraWhitespace ctermbg=grey guibg=grey
 " enable removal of whitespaces and tabs from the file (disable by calling :NE
 " and reenable by calling :SE
 call SetErase()
+

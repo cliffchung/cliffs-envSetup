@@ -46,3 +46,20 @@ Thumbs.db
 ###################
 .swp
 ccache_dir
+
+
+###############
+# Build files #
+###############
+.classpath
+project.properties
+.project
+.settings/
+bin/
+gen/
+
+################
+# Random files #
+################
+screen.png
+nohup.out

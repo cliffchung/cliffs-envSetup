@@ -1,3 +1,7 @@
+" ========== Load plugins ==========
+" setup pathogen
+execute pathogen#infect()
+
 " ========== General Config ==========
 
 " use vim settings rather than vi
@@ -17,7 +21,6 @@ set noequalalways                   " don't resize splits when a buffer is close
 set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
-set nojoinspaces                    " when using join don't add spaces
 
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting
@@ -38,14 +41,11 @@ set showmatch
 set mat=2
 
 " status line style
-set statusline=\ %{HasPaste()}%f%m%r%h\ %w\ \ Line:\ %l,%c
-
-" title style
-set titlestring=%F%m%r
+set laststatus=2
+set statusline=\ %f%m%r%h\ %w\ \ Line:\ %l,%c
 
 " ruler bar
 set formatoptions+=roc
-set laststatus=2
 set ruler
 
 " highlight color options
@@ -122,21 +122,10 @@ map <C-x> "*x<CR>
 " set tab to invoke the autocomplete menu
 let g:SuperTabDefaultCompletionType = "context"
 
-" mapping to move between tabs
-nmap <C-Left> :tabprevious<CR>
-nmap <C-Right> :tabnext<CR>
-nmap <silent> <A-Left> :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
-nmap <silent> <A-Right> :execute 'silent! tabmove ' . tabpagenr()<CR>
+" F7 will auto indent the whole file
+map <F7> mzgg=G`z<CR>
 
 " ========== Functions ==========
-
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    en
-    return ''
-endfunction
 
 " re-enable removal of whitespaces and tabs from a file
 function! SetErase()
@@ -177,6 +166,9 @@ nnoremap <C-D> :call SmoothScroll(0)<Enter>
 inoremap <C-U> <Esc>:call SmoothScroll(1)<Enter>i
 inoremap <C-D> <Esc>:call SmoothScroll(0)<Enter>i
 
+" Map \x to prettify single line xml
+nnoremap \x :%s/>\s*</>\r</g<CR>
+
 " ========== Special Customizations ==========
 
 autocmd BufRead,BufNewFile * set formatoptions-=cro     " don't insert comment automatically on new line
@@ -199,3 +191,15 @@ highlight ExtraWhitespace ctermbg=grey guibg=grey
 " and reenable by calling :SE
 call SetErase()
 
+" ========== Syntastic ==========
+" don't do a check on wq
+let g:syntastic_check_on_wq = 0
+
+" don't auto jump to the first issue when saving a file
+let g:syntastic_auto_jump = 0
+
+" Map \c to do a syntastic check
+nnoremap \c :SyntasticCheck<CR>
+
+" make syntastic run in passive mode
+nnoremap \p :SyntasticToggleMode<CR>

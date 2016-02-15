@@ -68,6 +68,12 @@ copyDotDirectories() {
     done
 }
 
+setupVundle() {
+    mkdir -p ~/.vim/bundle
+    git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    vim +PluginInstall +qall
+}
+
 ################
 # Actual script
 ################
@@ -77,6 +83,7 @@ echo "======================"
 
 copyDotFiles
 copyDotDirectories
+setupVundle
 
 echo -e "\n\n"
 echo "Finished!"

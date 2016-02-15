@@ -1,12 +1,28 @@
-" ========== Load plugins ==========
-" setup pathogen
-execute pathogen#infect()
-
-" ========== General Config ==========
-
 " use vim settings rather than vi
 " This needs to be first because it changes other options as a side affect
 set nocompatible
+
+filetype off
+
+" ========== Load plugins ==========
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'       " Plugin manager
+Plugin 'ctrlp.vim'                  " Search for files within the directory
+Plugin 'Syntastic'                  " Static code analysis to find bugs
+Plugin 'easymotion/vim-easymotion'  " Easier key jump
+Plugin 'Valloric/YouCompleteMe'     " Source completion
+Plugin 'vim-airline/vim-airline'    " Nicer status line
+
+call vundle#end()            " required
+
+" Turn on vim's ability to recognize different types of files, and use custom
+" highlighters and indentation for them
+filetype plugin indent on    " required
+
+" ========== General Config ==========
 
 let spell_auto_type=""              " don't automatically spell check
 set history=1000                    " set a command history
@@ -30,6 +46,8 @@ set winminheight=0                  " min height of a split window
 set hlsearch                        " enable search highlighting
 set background=light                " sets the background color
 set t_Co=256                        " set the terminal color to 256
+set number                          " add line numbers
+set laststatus=2                    " show the status line
 
 " scrolling options
 set scrolloff=5                     " start scrolling a few lines away from margins
@@ -40,16 +58,13 @@ set sidescroll=1
 set showmatch
 set mat=2
 
-" status line style
-set laststatus=2
-set statusline=\ %f%m%r%h\ %w\ \ Line:\ %l,%c
-
 " ruler bar
 set formatoptions+=roc
 set ruler
 
 " highlight color options
 highlight Pmenu ctermbg=238 gui=bold
+highlight LineNr term=bold cterm=NONE ctermfg=NONE ctermbg=DarkGrey  gui=NONE guifg=NONE guibg=DarkGrey
 
 " ========== Completion Options ==========
 set wildmenu
@@ -80,10 +95,6 @@ set foldmethod=indent                   " fold based on indent
 set foldlevel=100
 
 " ========== Indentation ==========
-" Turn on vim's ability to recognize different types of files, and use custom
-" highlighters and indentation for them
-filetype plugin indent on
-
 set autoindent
 set smartindent
 set expandtab
@@ -169,6 +180,32 @@ inoremap <C-D> <Esc>:call SmoothScroll(0)<Enter>i
 " Map \x to prettify single line xml
 nnoremap \x :%s/>\s*</>\r</g<CR>
 
+" ========== Syntastic ==========
+" don't do a check on wq
+let g:syntastic_check_on_wq = 0
+
+" don't auto jump to the first issue when saving a file
+let g:syntastic_auto_jump = 0
+
+" Map \c to do a syntastic check
+nnoremap \c :SyntasticCheck<CR>
+
+" make syntastic run in passive mode
+nnoremap \p :SyntasticToggleMode<CR>
+
+" ========== EasyMotion ==========
+let g:EasyMotion_smartcase = 1 " turn on smart case
+
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
+
+" Jump to anywhere you want with minimal keystrokes, with just one key binding.
+" `s{char}{label}`
+nmap s <Plug>(easymotion-overwin-f)
+
+" JK motions: Line motions
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
+
 " ========== Special Customizations ==========
 
 autocmd BufRead,BufNewFile * set formatoptions-=cro     " don't insert comment automatically on new line
@@ -190,16 +227,3 @@ highlight ExtraWhitespace ctermbg=grey guibg=grey
 " enable removal of whitespaces and tabs from the file (disable by calling :NE
 " and reenable by calling :SE
 call SetErase()
-
-" ========== Syntastic ==========
-" don't do a check on wq
-let g:syntastic_check_on_wq = 0
-
-" don't auto jump to the first issue when saving a file
-let g:syntastic_auto_jump = 0
-
-" Map \c to do a syntastic check
-nnoremap \c :SyntasticCheck<CR>
-
-" make syntastic run in passive mode
-nnoremap \p :SyntasticToggleMode<CR>

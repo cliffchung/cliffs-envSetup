@@ -72,11 +72,6 @@ setupVundle() {
     mkdir -p ~/.vim/bundle
     git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
-
-    # setup YouCompleteMe
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
-            --tern-completer --racer-completer
 }
 
 ################

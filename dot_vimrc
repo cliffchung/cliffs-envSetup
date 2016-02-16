@@ -13,7 +13,6 @@ Plugin 'VundleVim/Vundle.vim'       " Plugin manager
 Plugin 'ctrlp.vim'                  " Search for files within the directory
 Plugin 'Syntastic'                  " Static code analysis to find bugs
 Plugin 'easymotion/vim-easymotion'  " Easier key jump
-Plugin 'Valloric/YouCompleteMe'     " Source completion
 Plugin 'vim-airline/vim-airline'    " Nicer status line
 
 call vundle#end()            " required
@@ -129,9 +128,6 @@ nmap <C-n> :tnext<CR>
 "map ctrl c to yank to the buffer
 map <C-c> "*y<CR>
 map <C-x> "*x<CR>
-
-" set tab to invoke the autocomplete menu
-let g:SuperTabDefaultCompletionType = "context"
 
 " F7 will auto indent the whole file
 map <F7> mzgg=G`z<CR>

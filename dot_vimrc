@@ -205,8 +205,6 @@ nnoremap <silent> <Leader>v :call fzf#run({
 imap <C-x><C-f> <plug>(fzf-complete-file-ag)
 imap <C-x><C-l> <plug>(fzf-complete-line)
 
-"map <C-P> :call fzf#run({})<CR>
-
 " Fuzzy file finder
 let g:fzf_action = {
             \ 'ctrl-s': 'split',

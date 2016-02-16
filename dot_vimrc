@@ -5,17 +5,24 @@ set nocompatible
 filetype off
 
 " ========== Load plugins ==========
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+set rtp+=~/.vim/bundle/fzf
 
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'       " Plugin manager
-Plugin 'ctrlp.vim'                  " Search for files within the directory
-Plugin 'Syntastic'                  " Static code analysis to find bugs
-Plugin 'easymotion/vim-easymotion'  " Easier key jump
-Plugin 'vim-airline/vim-airline'    " Nicer status line
+call plug#begin('~/.vim/plugged')
 
-call vundle#end()            " required
+" Static code analysis to find bugs
+Plug 'Syntastic'
+
+" Easier key jump
+Plug 'easymotion/vim-easymotion'
+
+" Nicer status line
+Plug 'vim-airline/vim-airline'
+
+" Fuzzy completion
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+
+" Add plugins to &runtimepath
+call plug#end()
 
 " Turn on vim's ability to recognize different types of files, and use custom
 " highlighters and indentation for them
@@ -129,6 +136,9 @@ nmap <C-n> :tnext<CR>
 map <C-c> "*y<CR>
 map <C-x> "*x<CR>
 
+" set tab to invoke the autocomplete menu
+let g:SuperTabDefaultCompletionType = "context"
+
 " F7 will auto indent the whole file
 map <F7> mzgg=G`z<CR>
 
@@ -150,28 +160,6 @@ endfunction
 " Assign :SE and :NE to SetErase and NoErase respectively
 command! -range -nargs=* SE <line1>,<line2> call SetErase()
 command! -range -nargs=* NE <line1>,<line2> call NoErase()
-
-" smooth scrolling
-function SmoothScroll(up)
-    if a:up
-        let scrollaction="\<C-Y>"
-    else
-        let scrollaction="\<C-E>"
-    endif
-    exec "norm " . scrollaction
-    redraw
-    let counter=1
-    while counter<&scroll
-        let counter+=1
-        sleep 10m
-        redraw
-        exec "norm " . scrollaction
-    endwhile
-endfunction
-nnoremap <C-U> :call SmoothScroll(1)<Enter>
-nnoremap <C-D> :call SmoothScroll(0)<Enter>
-inoremap <C-U> <Esc>:call SmoothScroll(1)<Enter>i
-inoremap <C-D> <Esc>:call SmoothScroll(0)<Enter>i
 
 " Map \x to prettify single line xml
 nnoremap \x :%s/>\s*</>\r</g<CR>
@@ -201,6 +189,39 @@ nmap s <Plug>(easymotion-overwin-f)
 " JK motions: Line motions
 map <Leader>j <Plug>(easymotion-j)
 map <Leader>k <Plug>(easymotion-k)
+
+" ========== FZF ==========
+
+" Open files in horizontal split
+nnoremap <silent> <Leader>s :call fzf#run({
+            \   'down': '40%',
+            \   'sink': 'botright split' })<CR>
+
+" Open files in vertical horizontal split
+nnoremap <silent> <Leader>v :call fzf#run({
+            \   'right': winwidth('.') / 2,
+            \   'sink':  'vertical botright split' })<CR>
+
+imap <C-x><C-f> <plug>(fzf-complete-file-ag)
+imap <C-x><C-l> <plug>(fzf-complete-line)
+
+"map <C-P> :call fzf#run({})<CR>
+
+" Fuzzy file finder
+let g:fzf_action = {
+            \ 'ctrl-s': 'split',
+            \ 'ctrl-v': 'vsplit'
+            \ }
+
+" Default fzf layout
+" - down / up / left / right
+" - window (nvim only)
+let g:fzf_layout = { 'down': '~40%' }
+
+" For Commits and BCommits to customize the options used by 'git log':
+let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
+
+nnoremap <silent> <C-p> :FZF -m<cr>
 
 " ========== Special Customizations ==========
 

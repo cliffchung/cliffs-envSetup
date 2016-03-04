@@ -21,6 +21,12 @@ Plug 'vim-airline/vim-airline'
 " Fuzzy completion
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
+" Make tab more useful
+Plug 'ervandew/supertab'
+
+" Run tmux commands within vim
+Plug 'benmills/vimux'
+
 " Add plugins to &runtimepath
 call plug#end()
 
@@ -166,6 +172,13 @@ command! -range -nargs=* NE <line1>,<line2> call NoErase()
 nnoremap \x :%s/>\s*</>\r</g<CR>
 
 " ========== Syntastic ==========
+" Ensure that syntastic is not by default active
+let g:syntastic_mode_map = {
+            \ "mode": "passive" }
+
+" don't do a check on open
+let g:syntastic_check_on_open = 0
+
 " don't do a check on wq
 let g:syntastic_check_on_wq = 0
 

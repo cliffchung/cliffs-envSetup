@@ -1,42 +1,45 @@
-# zsh interactive startup
-
-#Enviroment Variables for Perforce
-export P4PORT=perforce:9591
-export P4CONFIG=.p4config
-
 # use emacs bindings, even though we set EDITOR to vi
 bindkey -e
 
 limit coredumpsize 0
 
-setopt NO_NOMATCH
-setopt AUTO_RESUME
-setopt NOTIFY
-setopt NO_PROMPT_CR
-
-#Keep the terminal history around
-setopt APPEND_HISTORY
-
 MAILCHECK=90000 # never
 
 ######################### zsh options ################################
 setopt ALWAYS_TO_END           # Push that cursor on completions.
+setopt COMPLETE_IN_WORD        # allow completion from wthin a word/phrase
 setopt AUTO_NAME_DIRS          # change directories  to variable names
 setopt AUTO_PUSHD              # push directories on every cd
 setopt NO_BEEP                 # self explanatory
+setopt AUTO_CD                 # why would you type 'cd dir' if you could just type 'dir'?
+setopt PUSHD_SILENT            # No more annoying pushd messages...
+setopt PUSHD_MINUS             # subtract from pushd on pop
+setopt PUSHD_TO_HOME           # blank pushd goes to home
+setopt PUSHD_IGNORE_DUPS       # don't push multiple copies of hte same directory into the stack
+setopt RM_STAR_WAIT            # 10 second wait if you do something that will delete everything.
+setopt VI                      # set the default editor to vim
+setopt AUTO_RESUME             # treat single word commands without redirection
+setopt NOTIFY                  # report the status of background jobs immediately
 
-DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
+export EDITOR="vi"
+
+export DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
 
 ######################### history options ############################
 setopt EXTENDED_HISTORY        # store time in history
-setopt HIST_EXPIRE_DUPS_FIRST  # unique events are more usefull to me
-setopt HIST_VERIFY         # Make those history commands nice
+setopt APPEND_HISTORY          # allows multiple terminal sessions to all append to a single history
+setopt HIST_IGNORE_DUPS        # ignore duplicate history events
+setopt HIST_FIND_NO_DUPS       # don't display results already cycled through twice
+setopt HIST_EXPIRE_DUPS_FIRST  # unique events are more useful to me
+setopt HIST_VERIFY             # Make those history commands nice
 setopt INC_APPEND_HISTORY      # immediatly insert history into history file
-HISTSIZE=15000                 # spots for duplicates/uniques
-SAVEHIST=15000                 # unique events guarenteed
-HISTFILE=~/.history
-FIGNORE=".o:~"
-WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+setopt HIST_REDUCE_BLANKS      # remove extra blanks before being added to history
+
+export HISTSIZE=15000                 # spots for duplicates/uniques
+export SAVEHIST=15000                 # unique events guaranteed
+export HISTFILE=~/.history
+export FIGNORE=".o:~"
+export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 
 ##################################
 #Display the path in the title bar
@@ -90,9 +93,9 @@ alias wterm='gnome-terminal --disable-sound --foreground=#000000 --background=#F
 alias gterm='gnome-terminal --disable-sound --foreground=#ffffff --background=#2F4F4F --title=GnomeGreen &'
 alias bterm='gnome-terminal --disable-sound --foreground=#ffffff --background=#000080 --title=GnomeBlue &'
 
-source ~/.environment
-
 bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
 bindkey "^T" push-line-or-edit
+
+source ~/.environment

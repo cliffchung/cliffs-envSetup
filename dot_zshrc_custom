@@ -1,0 +1,55 @@
+# zsh interactive startup
+
+# use emacs bindings, even though we set EDITOR to vi
+bindkey -e
+
+limit coredumpsize 0
+
+setopt NO_NOMATCH
+setopt AUTO_RESUME
+setopt NOTIFY
+setopt NO_PROMPT_CR
+
+#Keep the terminal history around
+setopt APPEND_HISTORY
+
+MAILCHECK=90000 # never
+
+######################### zsh options ################################
+setopt ALWAYS_TO_END           # Push that cursor on completions.
+setopt AUTO_NAME_DIRS          # change directories  to variable names
+setopt AUTO_PUSHD              # push directories on every cd
+setopt NO_BEEP                 # self explanatory
+
+DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
+
+######################### history options ############################
+setopt EXTENDED_HISTORY        # store time in history
+setopt HIST_VERIFY         # Make those history commands nice
+setopt INC_APPEND_HISTORY      # immediatly insert history into history file
+setopt HIST_FIND_NO_DUPS    # Do not show duplicates when searching through history
+setopt HIST_IGNORE_ALL_DUPS     #Ignore duplicate events in history
+HISTSIZE=15000                 # spots for duplicates/uniques
+SAVEHIST=15000                 # unique events guarenteed
+HISTFILE=~/.history
+FIGNORE=".o:~"
+WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+
+hostcmds=(rlogin rcp) # zsh knows about telnet, ftp, etc
+compctl -v setenv
+compctl -K module_complete cdm
+compctl -K bz_module_complete cdb
+
+autoload -U compinit
+compinit
+
+source ~/.environment
+
+bindkey "^R" history-incremental-search-backward
+bindkey "^E" end-of-line
+bindkey "^A" beginning-of-line
+bindkey "^T" push-line-or-edit
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+eval "$(rbenv init -)"

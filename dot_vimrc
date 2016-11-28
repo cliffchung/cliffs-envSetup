@@ -20,12 +20,28 @@ Plug 'vim-airline/vim-airline'
 
 " Fuzzy completion
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 
 " Make tab more useful
 Plug 'ervandew/supertab'
 
+" Add autocomplete for java
+Plug 'artur-shaik/vim-javacomplete2'
+
+" Add easier tmux navigation
+Plug 'christoomey/vim-tmux-navigator'
+
 " Run tmux commands within vim
 Plug 'benmills/vimux'
+
+" NERDTree
+Plug 'scrooloose/nerdtree'
+
+" Make tabs align nicely
+Plug 'godlygeek/tabular'
+
+" Make paste work nicely and stop auto-indenting
+Plug 'ConradIrwin/vim-bracketed-paste'
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -37,6 +53,7 @@ filetype plugin indent on    " required
 " ========== General Config ==========
 
 let spell_auto_type=""              " don't automatically spell check
+let mapleader=','                   " change the leader key to be ,
 set history=1000                    " set a command history
 set hidden                          " allow for buffer to be hidden
 set clipboard+=unnamed              " share clipboard
@@ -113,7 +130,7 @@ set smartindent
 set expandtab
 set smarttab
 set tabstop=4
-set softtabstop=4
+set softtabstop=0
 set shiftwidth=4
 
 " ========== Auto Complete ==========
@@ -121,55 +138,42 @@ set shiftwidth=4
 " enable java autocomplete (omnicomplete)
 " Only do this part when compiled with support for autocommands.
 if has("autocmd")
-    autocmd Filetype java setlocal omnifunc=javacomplete#Complete
-    setlocal completefunc=javacomplete#CompleteParamsInfo
-    " nicer autocomplete
-    inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
-    inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
+  autocmd Filetype java setlocal omnifunc=javacomplete#Complete
+  inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
+  inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
 endif
 
-" ========== Tags ==========
-set tags=.tags;~/.vim/tags
 
-" regenerate tags when F12 is pressed
-nmap <F12> :!ctags -R -h java -f .tags ./src<CR>
-
-" goto the next tag
-nmap <C-n> :tnext<CR>
-
-" ========== Mappings ==========
-
-"map ctrl c to yank to the buffer
-map <C-c> "*y<CR>
-map <C-x> "*x<CR>
+" ========== SuperTab ==========
 
 " set tab to invoke the autocomplete menu
 let g:SuperTabDefaultCompletionType = "context"
 
-" F7 will auto indent the whole file
-map <F7> mzgg=G`z<CR>
+" make CR select the current entry and don't insert a new line
+let g:SuperTabCrMapping=1
 
-" ========== Functions ==========
+" when tab is hit, don't select the first entry, but insert the longest common text
+" of all matches (longest), also always show the menu even if only one option (menuone)
+set completeopt=longest,menuone
 
-" re-enable removal of whitespaces and tabs from a file
-function! SetErase()
-    augroup extraSpaceGroup
-        autocmd BufWritePre * :%s/\s\+$//ge
-        autocmd BufWritePre * :%s/\t/    /ge
-    augroup END
-endfunction
+" ========== JavaComplete ==========
 
-" disable removing whitespaces and tabs from a file
-function! NoErase()
-    autocmd! extraSpaceGroup
-endfunction
+" guess import options
+nmap <F4> <Plug>(JavaComplete-Imports-AddSmart)
+imap <F4> <Plug>(JavaComplete-Imports-AddSmart)
 
-" Assign :SE and :NE to SetErase and NoErase respectively
-command! -range -nargs=* SE <line1>,<line2> call SetErase()
-command! -range -nargs=* NE <line1>,<line2> call NoErase()
+" add imports after asking
+nmap <F5> <Plug>(JavaComplete-Imports-Add)
+imap <F5> <Plug>(JavaComplete-Imports-Add)
 
-" Map \x to prettify single line xml
-nnoremap \x :%s/>\s*</>\r</g<CR>
+" add missing imports
+nmap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+imap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+
+" remove unused imports
+nmap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+
 
 " ========== Syntastic ==========
 " Ensure that syntastic is not by default active
@@ -201,7 +205,7 @@ let g:EasyMotion_do_mapping = 0 " Disable default mappings
 nmap s <Plug>(easymotion-overwin-f)
 
 " JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
+map <Leader>d <Plug>(easymotion-j)
 map <Leader>k <Plug>(easymotion-k)
 
 " ========== FZF ==========
@@ -233,11 +237,104 @@ let g:fzf_layout = { 'down': '~40%' }
 " For Commits and BCommits to customize the options used by 'git log':
 let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
 
-nnoremap <silent> <C-p> :FZF -m<cr>
+nnoremap <silent> <C-t> :FZF -m<cr>
+
+
+" ========== NERDTree =============
+
+" Map Ctrl+N to open NerdTree
+map <C-n> :NERDTreeToggle<CR>
+
+" Open up NERDTree automatically if vim is started with no files specified
+" autocmd StdinReadPre * let s:std_in=1
+" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" Close NERDTree if its the only window open
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+
+" =========== Airline ==========
+
+" Enable the list of buffers
+let g:airline#extensions#tabline#enabled = 1
+
+" Show just the filename
+let g:airline#extensions#tabline#fnamemod = ':t'
+
+
+" =========== Tabularize ==========
+
+nnoremap <leader>a= :Tabularize /=<CR>
+vnoremap <leader>a= :Tabularize /=<CR>
+nnoremap <leader>a: :Tabularize /:\zs<CR>
+vnoremap <leader>a: :Tabularize /:\zs<CR>
+
+" ========== Mappings ==========
+
+"map ctrl c to yank to the buffer
+map <C-c> "*y<CR>
+map <C-x> "*x<CR>
+
+" F8 will auto indent the whole file
+map <F8> mzgg=G`z<CR>
+
+" Move to the next buffer
+nmap <leader>l :bnext<CR>
+
+" Move to the previous buffer
+nmap <leader>h :bprevious<CR>
+
+" Show all open buffers and their status
+nmap <leader>bl :ls<CR>
+
+" To open a new empty buffer
+" This replaces :tabnew which I used to bind to this mapping
+nmap <leader>T :enew<cr>
+
+" Close the current buffer and move to the previous one
+" This replicates the idea of closing a tab
+nmap <leader>bq :bp <BAR> bd #<CR>
+
+" Show all open buffers and their status
+nmap <leader>bl :ls<CR>
+
+" Switch to buffer quickly
+nnoremap <leader>b :ls<cr>:b<space>
+
+" ========== Functions ==========
+
+" re-enable removal of whitespaces and tabs from a file
+function! SetErase()
+    augroup extraSpaceGroup
+        autocmd BufWritePre * :%s/\s\+$//ge
+        autocmd BufWritePre * :%s/\t/    /ge
+    augroup END
+endfunction
+
+" disable removing whitespaces and tabs from a file
+function! NoErase()
+    augroup extraSpaceGroup
+        autocmd BufWritePre * :%s/\s\+$//ge
+        autocmd BufWritePre * :%s/\t/    /ge
+    augroup END
+    autocmd! extraSpaceGroup
+endfunction
+
+" Assign :SE and :NE to SetErase and NoErase respectively
+command! -range -nargs=* SE <line1>,<line2> call SetErase()
+command! -range -nargs=* NE <line1>,<line2> call NoErase()
+
+" Map <leader>x to prettify selected xml
+vnoremap <leader>x :s/>\s*</>\r</g<CR>
+
+" Map <leader>j to prettify selected json
+vnoremap <leader>j :!python -m json.tool<CR>
+
 
 " ========== Special Customizations ==========
 
-autocmd BufRead,BufNewFile * set formatoptions-=cro     " don't insert comment automatically on new line
+" don't insert comment automatically on new line
+autocmd BufRead,BufNewFile * set formatoptions-=cro
 
 " match ExtraWhitespace /\s\+$\|\t/
 autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/
@@ -253,6 +350,25 @@ autocmd BufReadPost *
 " highlight trailing whitespaces and also tab characters
 highlight ExtraWhitespace ctermbg=grey guibg=grey
 
-" enable removal of whitespaces and tabs from the file (disable by calling :NE
-" and reenable by calling :SE
-call SetErase()
+" disable removal of whitespaces and tabs from the file (disable by calling :NE
+" and reenable by calling :SE)
+call NoErase()
+
+
+" ========== Amazon Stuff ==========
+
+let g:syntastic_java_javac_custom_classpath_command="brazil-path testlib.classpath | gawk 'BEGIN {RS=\":\"} {print $1;}'"
+
+function! ResetJavaCompleteLibsPath()
+    let g:JavaComplete_LibsPath=system("brazil-path testlib.classpath")
+endfunction
+
+if (!exists("g:JavaComplete_LibsPath") && &filetype=='java')
+    call ResetJavaCompleteLibsPath()
+endif
+
+nmap <F9> call ResetJavaCompleteLibsPath()
+
+" =========== Skylight stuff ===========
+
+let g:JavaComplete_ImportOrder = ['java.', 'javax.', 'org.', 'com.', 'net.']

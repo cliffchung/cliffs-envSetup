@@ -68,10 +68,15 @@ copyDotDirectories() {
     done
 }
 
-setupVundle() {
-    mkdir -p ~/.vim/bundle
-    git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+setupVimPlugins() {
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     vim +PluginInstall +qall
+}
+
+installOhMyZsh() {
+    # this is an idempotent operation
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 }
 
 ################
@@ -83,7 +88,8 @@ echo "======================"
 
 copyDotFiles
 copyDotDirectories
-setupVundle
+setupVimPlugins
+installOhMyZsh
 
 echo -e "\n\n"
 echo "Finished!"

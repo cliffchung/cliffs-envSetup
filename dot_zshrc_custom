@@ -51,5 +51,3 @@ bindkey "^A" beginning-of-line
 bindkey "^T" push-line-or-edit
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-eval "$(rbenv init -)"

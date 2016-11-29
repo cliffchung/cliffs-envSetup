@@ -29,5 +29,8 @@ then
     alias netstat="sudo lsof -i -P"
 
     # groom ruby
-    eval "$(rbenv init -)"
+    if [ -z "`which rbenv`" ];
+    then
+        eval "$(rbenv init -)"
+    fi
 fi

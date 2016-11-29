@@ -86,10 +86,13 @@ installOhMyZsh() {
 echo "Setting up environment"
 echo "======================"
 
-copyDotFiles
-copyDotDirectories
+# Install useful tools first
 setupVimPlugins
 installOhMyZsh
+
+# Do these after installation steps so we have our own configurations
+copyDotFiles
+copyDotDirectories
 
 echo -e "\n\n"
 echo "Finished!"

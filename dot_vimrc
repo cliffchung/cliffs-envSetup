@@ -56,7 +56,6 @@ let spell_auto_type=""              " don't automatically spell check
 let mapleader=','                   " change the leader key to be ,
 set history=1000                    " set a command history
 set hidden                          " allow for buffer to be hidden
-set clipboard+=unnamed              " share clipboard
 set visualbell                      " no sounds
 set viminfo^=%                      " remember info about buffers on close
 set nowrap                          " turn off word wrap by default (do "set wrap" to turn it on again, or remove this line)
@@ -67,6 +66,9 @@ set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
 set ttymouse=xterm2                 " enable the in tmux
+if $TMUX == ""                      " only do this if we're not in tmux
+    set clipboard+=unnamed          " share clipboard
+endif
 
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting

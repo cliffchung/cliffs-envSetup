@@ -34,3 +34,12 @@ then
         eval "$(rbenv init -)"
     fi
 fi
+
+######################
+# FZF Options
+######################
+
+export FZF_DEFAULT_COMMAND='ag --smart-case -g ""'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+export FZF_DEFAULT_OPTS="--no-sort --reverse"
+export TERM="screen-256color" # to fix rendering issues

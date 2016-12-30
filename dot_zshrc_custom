@@ -49,5 +49,3 @@ bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
 bindkey "^T" push-line-or-edit
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

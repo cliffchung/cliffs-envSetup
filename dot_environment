@@ -4,6 +4,7 @@
 
 # Bash aliases
 alias echo="echo -e" # allows for backslash escaped characters
+alias cd='pushd . > /dev/null; cd'
 
 # Standard aliases
 alias u='cd ../'
@@ -27,12 +28,6 @@ then
     alias gvim='open -a MacVim.app'
     alias ecl='/Applications/eclipse/eclipse&'
     alias netstat="sudo lsof -i -P"
-
-    # groom ruby
-    if [ -z "`which rbenv`" ];
-    then
-        eval "$(rbenv init -)"
-    fi
 fi
 
 ######################

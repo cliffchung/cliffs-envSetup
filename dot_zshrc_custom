@@ -24,13 +24,14 @@ setopt NO_BEEP                 # self explanatory
 DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
 
 ######################### history options ############################
-setopt EXTENDED_HISTORY        # store time in history
-setopt HIST_VERIFY         # Make those history commands nice
-setopt INC_APPEND_HISTORY      # immediatly insert history into history file
+setopt EXTENDED_HISTORY     # store time in history
+setopt HIST_VERIFY          # Make those history commands nice
+setopt INC_APPEND_HISTORY   # immediatly insert history into history file
 setopt HIST_FIND_NO_DUPS    # Do not show duplicates when searching through history
-setopt HIST_IGNORE_ALL_DUPS     #Ignore duplicate events in history
-HISTSIZE=15000                 # spots for duplicates/uniques
-SAVEHIST=15000                 # unique events guarenteed
+setopt HIST_IGNORE_ALL_DUPS # Ignore duplicate events in history
+setopt NO_SHARE_HISTORY     # do not share the history file between windows
+HISTSIZE=15000              # spots for duplicates/uniques
+SAVEHIST=15000              # unique events guarenteed
 HISTFILE=~/.history
 FIGNORE=".o:~"
 WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
@@ -40,8 +41,7 @@ compctl -v setenv
 compctl -K module_complete cdm
 compctl -K bz_module_complete cdb
 
-autoload -U compinit
-compinit
+autoload -Uz compinit && compinit
 
 source ~/.environment
 
@@ -49,3 +49,15 @@ bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
 bindkey "^T" push-line-or-edit
+
+eval "$(rbenv init -)"
+
+if [[ $TERM == "screen-256color" ]]; then
+    #Mac OSX/BSD bindings for Home/End/Del
+    bindkey "^[[H" beginning-of-line
+    bindkey "^[[F" end-of-line
+    bindkey "^[[3~" delete-char
+fi
+
+######################## oh my zsh custom ############################
+source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

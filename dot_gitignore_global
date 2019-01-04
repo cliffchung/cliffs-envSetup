@@ -46,7 +46,17 @@ Thumbs.db
 ###################
 .swp
 ccache_dir
+.tags
 
+#############
+# IDE files #
+#############
+
+.metadata/
+RemoteSystemsTempFiles/
+eclipse-bin/
+*.iml
+.idea/
 
 ###############
 # Build files #
@@ -55,8 +65,11 @@ ccache_dir
 project.properties
 .project
 .settings/
-bin/
+.gradle/
+#bin/
 gen/
+build/
+build
 
 ################
 # Random files #

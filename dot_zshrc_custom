@@ -19,6 +19,8 @@ MAILCHECK=90000 # never
 setopt ALWAYS_TO_END           # Push that cursor on completions.
 setopt AUTO_NAME_DIRS          # change directories  to variable names
 setopt AUTO_PUSHD              # push directories on every cd
+setopt PUSHD_IGNORE_DUPS       # ignore duplicates in pushd stack
+setopt AUTO_CD                 # automatically cd into directories if typed
 setopt NO_BEEP                 # self explanatory
 
 DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
@@ -49,6 +51,8 @@ bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
 bindkey "^T" push-line-or-edit
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
 
 eval "$(rbenv init -)"
 

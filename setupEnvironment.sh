@@ -86,6 +86,9 @@ installOhMyZsh() {
 echo "Setting up environment"
 echo "======================"
 
+echo "Useful to setup"
+echo "*    https://github.com/BurntSushi/ripgrep"
+
 # Install useful tools first
 setupVimPlugins
 installOhMyZsh

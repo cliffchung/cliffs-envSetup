@@ -21,9 +21,6 @@ Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 " Make tab more useful
 Plug 'ervandew/supertab'
 
-" Add autocomplete for java
-Plug 'artur-shaik/vim-javacomplete2'
-
 " Add easier tmux navigation
 Plug 'christoomey/vim-tmux-navigator'
 
@@ -44,6 +41,12 @@ Plug 'chikamichi/mediawiki.vim'
 
 " Syntax highlighting for yaml
 Plug 'avakhov/vim-yaml'
+
+" Hex editing with VIM
+Plug 'Shougo/vinarise.vim'
+
+" Kotlin highlighting
+Plug 'udalov/kotlin-vim'
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -146,7 +149,6 @@ if has("autocmd")
   inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
 endif
 
-
 " ========== SuperTab ==========
 
 " set tab to invoke the autocomplete menu
@@ -226,6 +228,10 @@ let g:fzf_colors =
 
 nnoremap <silent> <C-t> :FZF<cr>
 
+" ========== rip-grep =============
+
+command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
+map <C-g> :Find<SPACE>
 
 " ========== NERDTree =============
 
@@ -324,7 +330,6 @@ vnoremap <leader>x :s/>\s*</>\r</g<CR>
 " Map <leader>j to prettify selected json
 vnoremap <leader>j :!python -m json.tool<CR>
 
-
 " ========== Special Customizations ==========
 
 " don't insert comment automatically on new line
@@ -348,25 +353,8 @@ highlight ExtraWhitespace ctermbg=grey guibg=grey
 " and reenable by calling :SE)
 call NoErase()
 
-
 " resize windows by default by 10 lines
 nnoremap <silent> <Leader>= :exe "resize +5"<CR>
 nnoremap <silent> <Leader>- :exe "resize -5"<CR>
 nnoremap <silent> <Leader>[ :exe "vertical resize +5"<CR>
 nnoremap <silent> <Leader>] :exe "vertical resize -5"<CR>
-
-" ========== Amazon Stuff ==========
-
-function! ResetJavaCompleteLibsPath()
-    let g:JavaComplete_LibsPath=system("brazil-path testlib.classpath")
-endfunction
-
-if (!exists("g:JavaComplete_LibsPath") && &filetype=='java')
-    call ResetJavaCompleteLibsPath()
-endif
-
-nmap <F9> call ResetJavaCompleteLibsPath()
-
-" =========== Skylight stuff ===========
-
-let g:JavaComplete_ImportOrder = ['java.', 'javax.', 'org.', 'com.', 'net.']

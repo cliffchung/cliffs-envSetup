@@ -1,0 +1,18 @@
+" Move to previous cursor location
+CTRL-O
+
+" Move to next cursor location
+CTRL-I
+
+" vimdiff
+]c :        - next difference
+[c :        - previous difference
+do          - diff obtain
+dp          - diff put
+zo          - open folded text
+zc          - close folded text
+:diffupdate - re-scan the files for differences
+
+" undo git
+git reflog
+git reset --hard HEAD${<NUM>}

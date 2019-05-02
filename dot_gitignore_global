@@ -70,9 +70,12 @@ project.properties
 gen/
 build/
 build
+local.properties
 
 ################
 # Random files #
 ################
 screen.png
 nohup.out
+cscope.out
+tags

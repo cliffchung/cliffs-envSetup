@@ -53,8 +53,12 @@ plugins=(git tmux)
 
 # User configuration
 
-# export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/opt:$PATH"
 # export MANPATH="/usr/local/man:$MANPATH"
+
+# TMUX Configs
+ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_FIXTERM=true
 
 source $ZSH/oh-my-zsh.sh
 
@@ -92,3 +96,8 @@ RPROMPT=""
 source ~/.zshrc_custom
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# zsh-syntax-highlighting
+# This must be kept at the end
+# https://github.com/zsh-users/zsh-syntax-highlighting/
+source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

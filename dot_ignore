@@ -1,0 +1,20 @@
+*.git/
+tags
+*.patch
+*.map
+*.svg
+*.bin
+*.hex
+*.png
+
+##################
+# Amazon Config
+##################
+*.htm
+*.txt
+*.uvprojx
+*.uvoptx
+*.dep
+*.d
+*.resx
+*.crf

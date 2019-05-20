@@ -234,7 +234,7 @@ nnoremap <silent> <C-t> :FZF<cr>
 
 " ========== rip-grep =============
 
-command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
+command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global --ignore-case --hidden --follow --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
 map <C-g> :Find<SPACE><C-r><C-w><CR>
 
 " ========== NERDTree =============

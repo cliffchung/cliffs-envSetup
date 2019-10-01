@@ -90,8 +90,8 @@ source $ZSH/oh-my-zsh.sh
 # Reconnect to tmux by default (use with the tmux plugin)
 ZSH_TMUX_AUTOCONNECT=true
 
-# Disable the right prompt
-RPROMPT=""
+# Add a timestamp to the right prompt
+RPROMPT="[%@ ]"
 
 source ~/.zshrc_custom
 

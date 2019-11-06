@@ -8,9 +8,6 @@ filetype off
 
 call plug#begin('~/.vim/plugged')
 
-" Easier key jump
-Plug 'easymotion/vim-easymotion'
-
 " Nicer status line
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -18,7 +15,7 @@ Plug 'vim-airline/vim-airline-themes'
 " Fuzzy completion
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 
-" Make tab more useful
+" Make tab key more useful
 Plug 'ervandew/supertab'
 
 " Add easier tmux navigation
@@ -27,20 +24,19 @@ Plug 'christoomey/vim-tmux-navigator'
 " Run tmux commands within vim
 Plug 'benmills/vimux'
 
-" Make tabs align nicely
+" Make text align nicely
 Plug 'godlygeek/tabular'
 
 " Make paste work nicely and stop auto-indenting
 Plug 'ConradIrwin/vim-bracketed-paste'
 
-" Syntax highlighting for wiki
-Plug 'chikamichi/mediawiki.vim'
+" Git tooling
+Plug 'tpope/vim-fugitive'
 
-" Syntax highlighting for yaml
-Plug 'avakhov/vim-yaml'
+" Color schemes
+Plug 'rafi/awesome-vim-colorschemes'
 
-" Hex editing with VIM
-Plug 'Shougo/vinarise.vim'
+"" Highlighting
 
 " Kotlin highlighting
 Plug 'udalov/kotlin-vim'
@@ -48,18 +44,18 @@ Plug 'udalov/kotlin-vim'
 " TypeScript highlighting
 Plug 'leafgarland/typescript-vim'
 
-" Git merge tools
-Plug 'tpope/vim-fugitive'
+" Syntax highlighting for wiki
+Plug 'chikamichi/mediawiki.vim'
 
-" Color schemes
-Plug 'rafi/awesome-vim-colorschemes'
+" Syntax highlighting for yaml
+Plug 'avakhov/vim-yaml'
 
 " Add plugins to &runtimepath
 call plug#end()
 
 " Turn on vim's ability to recognize different types of files, and use custom
 " highlighters and indentation for them
-filetype plugin indent on    " required
+filetype plugin indent on
 
 " ========== General Config ==========
 
@@ -158,16 +154,6 @@ set diffopt+=vertical
 " auto diffupdate when diffput/diffget used
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 
-" ========== Auto Complete ==========
-
-" enable java autocomplete (omnicomplete)
-" Only do this part when compiled with support for autocommands.
-if has("autocmd")
-  autocmd Filetype java setlocal omnifunc=javacomplete#Complete
-  inoremap <buffer> <C-X><C-U> <C-X><C-U><C-P>
-  inoremap <buffer> <C-S-Space> <C-X><C-U><C-P>
-endif
-
 " ========== SuperTab ==========
 
 " set tab to invoke the autocomplete menu
@@ -179,26 +165,6 @@ let g:SuperTabCrMapping=1
 " when tab is hit, don't select the first entry, but insert the longest common text
 " of all matches (longest), also always show the menu even if only one option (menuone)
 set completeopt=longest,menuone
-
-" ========== EasyMotion ==========
-let g:EasyMotion_smartcase = 1 " turn on smart case
-
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-
-" <Leader>f{char} to move to {char}
-map  <Leader>f <Plug>(easymotion-bd-f)
-nmap <Leader>f <Plug>(easymotion-overwin-f)
-
-" s{char}{char} to move to {char}{char}
-nmap s <Plug>(easymotion-overwin-f2)
-
-" Move to line
-map <Leader>L <Plug>(easymotion-bd-jk)
-nmap <Leader>L <Plug>(easymotion-overwin-line)
-
-" Move to word
-map  <Leader>w <Plug>(easymotion-bd-w)
-nmap <Leader>w <Plug>(easymotion-overwin-w)
 
 " ========== FZF ==========
 
@@ -236,19 +202,6 @@ nnoremap <silent> <C-t> :FZF<cr>
 
 command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global --ignore-case --hidden --follow --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
 map <C-g> :Find<SPACE><C-r><C-w><CR>
-
-" ========== NERDTree =============
-
-" Map Ctrl+N to open NerdTree
-map <C-n> :NERDTreeToggle<CR>
-
-" Open up NERDTree automatically if vim is started with no files specified
-" autocmd StdinReadPre * let s:std_in=1
-" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
-" Close NERDTree if its the only window open
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
 
 " =========== Airline ==========
 
@@ -317,6 +270,21 @@ nmap <leader>bl :ls<CR>
 " Switch to buffer quickly
 nnoremap <leader>b :ls<cr>:b<space>
 
+" resize windows by default by 10 lines
+nnoremap <silent> <Leader>= :exe "resize +5"<CR>
+nnoremap <silent> <Leader>- :exe "resize -5"<CR>
+nnoremap <silent> <Leader>[ :exe "vertical resize +5"<CR>
+nnoremap <silent> <Leader>] :exe "vertical resize -5"<CR>
+
+" Toggle fullscreen window
+nnoremap <C-W>o :call MaximizeToggle()<CR>
+
+" Map <leader>x to prettify selected xml
+vnoremap <leader>x :s/>\s*</>\r</g<CR>
+
+" Map <leader>j to prettify selected json
+vnoremap <leader>j :!python -m json.tool<CR>
+
 " ========== Functions ==========
 
 " re-enable removal of whitespaces and tabs from a file
@@ -343,16 +311,6 @@ command! -range -nargs=* NE <line1>,<line2> call NoErase()
 " disable removal of whitespaces and tabs from the file (disable by calling :NE
 " and reenable by calling :SE)
 call NoErase()
-
-" resize windows by default by 10 lines
-nnoremap <silent> <Leader>= :exe "resize +5"<CR>
-nnoremap <silent> <Leader>- :exe "resize -5"<CR>
-nnoremap <silent> <Leader>[ :exe "vertical resize +5"<CR>
-nnoremap <silent> <Leader>] :exe "vertical resize -5"<CR>
-
-nnoremap <C-W>O :call MaximizeToggle()<CR>
-nnoremap <C-W>o :call MaximizeToggle()<CR>
-nnoremap <C-W><C-O> :call MaximizeToggle()<CR>
 
 function! MaximizeToggle()
   if exists("s:maximize_session")
@@ -389,8 +347,8 @@ autocmd BufReadPost *
 " highlight trailing whitespaces and also tab characters
 highlight ExtraWhitespace ctermbg=grey guibg=grey
 
-" Map <leader>x to prettify selected xml
-vnoremap <leader>x :s/>\s*</>\r</g<CR>
-
-" Map <leader>j to prettify selected json
-vnoremap <leader>j :!python -m json.tool<CR>
+" Use typescript formatting for tsx files
+augroup SyntaxSettings
+    autocmd!
+    autocmd BufNewFile,BufRead *.tsx set filetype=typescript
+augroup END

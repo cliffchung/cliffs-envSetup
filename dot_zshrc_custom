@@ -97,7 +97,25 @@ export FZF_DEFAULT_OPTS="--reverse --border"
 export FZF_TMUX=1
 export TERM="xterm-256color" # to fix rendering issues
 
+
+######################
+# Theme
+######################
+
+PROMPT='
+$(_user_host)${_current_dir} $(git_prompt_info) $(_ruby_version)
+%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
+
+PROMPT2='%{$fg[$CARETCOLOR]%}<%{$reset_color%} '
+
+######################
+# Other
+######################
+
 if [[ -f ~/.zshrc_environment ]]
 then
     source ~/.zshrc_environment
 fi
+
+# Faster directory navigation
+source ~/bin/z/z.sh

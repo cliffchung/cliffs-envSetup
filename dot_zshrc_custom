@@ -1,4 +1,6 @@
-# zsh interactive startup
+######################################################
+# Common zsh configs for all environments
+######################################################
 
 # use emacs bindings, even though we set EDITOR to vi
 bindkey -e
@@ -14,6 +16,9 @@ setopt NO_PROMPT_CR
 setopt APPEND_HISTORY
 
 MAILCHECK=90000 # never
+
+# Set the path variable appropriately
+PATH=~/bin:/usr/local/bin/:${PATH}
 
 ######################### zsh options ################################
 setopt ALWAYS_TO_END           # Push that cursor on completions.
@@ -112,9 +117,9 @@ PROMPT2='%{$fg[$CARETCOLOR]%}<%{$reset_color%} '
 # Other
 ######################
 
-if [[ -f ~/.zshrc_environment ]]
+if [[ -f ~/.zshrc_machine ]]
 then
-    source ~/.zshrc_environment
+    source ~/.zshrc_machine
 fi
 
 # Faster directory navigation

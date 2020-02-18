@@ -51,9 +51,13 @@ DISABLE_AUTO_TITLE="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git tmux)
 
-# User configuration
+#######################################################
+# User configurations
+#######################################################
 
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/opt:$PATH"
+# Set the path variable appropriately
+export PATH="${HOME}/bin:/usr/local/bin:/usr/local/opt:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # TMUX Configs
@@ -63,41 +67,139 @@ ZSH_TMUX_FIXTERM=true
 ZSH_TMUX_AUTOCONNECT=true
 ZSH_TMUX_AUTOQUIT=false
 
+# Source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+# use emacs bindings, even though we set EDITOR to vi
+bindkey -e
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+##########################
+# Common ZSH options
+##########################
+setopt ALWAYS_TO_END           # Push that cursor on completions.
+setopt AUTO_NAME_DIRS          # change directories  to variable names
+setopt AUTO_PUSHD              # push directories on every cd
+setopt PUSHD_IGNORE_DUPS       # ignore duplicates in pushd stack
+setopt AUTO_CD                 # automatically cd into directories if typed
+setopt NO_BEEP                 # disable terminal dings
+setopt NO_NOMATCH
+setopt AUTO_RESUME
+setopt NOTIFY
+setopt NO_PROMPT_CR
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+DIRSTACKSIZE=20                # number of directories in your pushd/popd stack
+MAILCHECK=90000                # never
 
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
+#########################
+# History options
+#########################
+setopt EXTENDED_HISTORY     # store time in history
+setopt HIST_VERIFY          # Make those history commands nice
+setopt INC_APPEND_HISTORY   # immediatly insert history into history file
+setopt HIST_FIND_NO_DUPS    # Do not show duplicates when searching through history
+setopt HIST_IGNORE_ALL_DUPS # Ignore duplicate events in history
+setopt NO_SHARE_HISTORY     # do not share the history file between windows
+setopt APPEND_HISTORY       # Append to history file
+HISTSIZE=15000              # spots for duplicates/uniques
+SAVEHIST=15000              # unique events guarenteed
+HISTFILE=~/.history
+FIGNORE=".o:~"
+WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+########################
+# Completion options
+########################
+hostcmds=(rlogin rcp) # zsh knows about telnet, ftp, etc
+compctl -v setenv
+compctl -K module_complete cdm
+compctl -K bz_module_complete cdb
+
+autoload -Uz compinit && compinit
+
+#######################
+# Key bindings
+#######################
+
+bindkey "^R" history-incremental-search-backward
+bindkey "^E" end-of-line
+bindkey "^A" beginning-of-line
+bindkey "^T" push-line-or-edit
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
+
+#################
+# Aliases
+#################
+
+# Bash aliases
+alias echo="echo -e" # allows for backslash escaped characters
+
+# Standard aliases
+alias u='cd ../'
+alias uu='cd ../../'
+alias uuu='cd ../../../'
+alias uuuu='cd ../../../../'
+alias uuuuu='cd ../../../../../'
+alias ll='ls -lah'
+
+#####################
+# Mac Specific Stuff
+#####################
+
+if [[ $OSTYPE =~ "darwin" ]]
+then
+    # enable coloring in terminal
+    export CLICOLOR=1
+    export LSCOLORS=FxFxCxDxBxegedabagacad
+
+    alias gvim='open -a MacVim.app'
+    alias netstat="sudo lsof -i -P"
+
+    #Mac OSX/BSD bindings for Home/End/Del
+    bindkey "^[[H" beginning-of-line
+    bindkey "^[[F" end-of-line
+    bindkey "^[[3~" delete-char
+fi
+
+######################
+# FZF Options
+######################
+
+export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+export FZF_CTRL_T_OPTS="--bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
+export FZF_DEFAULT_OPTS="--reverse --border"
+export FZF_TMUX=1
+export TERM="xterm-256color" # to fix rendering issues
+
+######################
+# Theme
+######################
+
+PROMPT='
+$(_user_host)${_current_dir} $(git_prompt_info) $(_ruby_version)
+%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
+
+PROMPT2='%{$fg[$CARETCOLOR]%}<%{$reset_color%} '
 
 # Add a timestamp to the right prompt
 RPROMPT="[%@ ]"
 
-source ~/.zshrc_custom
+######################
+# End of file setup
+######################
+
+if [ -f ~/.zshrc_machine ]
+then
+    source ~/.zshrc_machine
+fi
+
+# Faster directory navigation
+[ -f ~/bin/z/z.sh ] && source ~/bin/z/z.sh
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # zsh-syntax-highlighting
 # This must be kept at the end
 # https://github.com/zsh-users/zsh-syntax-highlighting/
-source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

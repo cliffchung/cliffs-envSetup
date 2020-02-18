@@ -152,14 +152,13 @@ install_powerline_fonts() {
 
 install_rip_grep() {
     echo "Setting up ripgrep"
-    local RIPGREP_DIR="${BIN_DIR}/ripgrep"
 
-    if [ -d "${RIPGREP_DIR}" ]; then
+    if brew ls --versions ripgrep > /dev/null; then
         echo "ripgrep already setup, skipping installation"
         return 0
     fi
 
-    git clone https://github.com/BurntSushi/ripgrep.git ${RIPGREP_DIR}
+    brew install ripgrep
 }
 
 install_z() {

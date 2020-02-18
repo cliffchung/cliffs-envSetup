@@ -58,24 +58,12 @@ plugins=(git tmux)
 # Set the path variable appropriately
 export PATH="${HOME}/bin:/usr/local/bin:/usr/local/opt:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# TMUX Configs
-ZSH_TMUX_AUTOSTART=true
-ZSH_TMUX_AUTOSTART_ONCE=true
-ZSH_TMUX_FIXTERM=true
-ZSH_TMUX_AUTOCONNECT=true
-ZSH_TMUX_AUTOQUIT=false
-
-# Source oh-my-zsh
-source $ZSH/oh-my-zsh.sh
-
-# use emacs bindings, even though we set EDITOR to vi
-bindkey -e
-
 ##########################
 # Common ZSH options
 ##########################
+# use emacs bindings, even though we set EDITOR to vi
+bindkey -e
+
 setopt ALWAYS_TO_END           # Push that cursor on completions.
 setopt AUTO_NAME_DIRS          # change directories  to variable names
 setopt AUTO_PUSHD              # push directories on every cd
@@ -142,6 +130,26 @@ alias uuuu='cd ../../../../'
 alias uuuuu='cd ../../../../../'
 alias ll='ls -lah'
 
+##########################
+# tmux configs
+##########################
+ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_AUTOSTART_ONCE=true
+ZSH_TMUX_FIXTERM=true
+ZSH_TMUX_AUTOCONNECT=true
+ZSH_TMUX_AUTOQUIT=false
+
+######################
+# FZF Options
+######################
+
+export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+export FZF_CTRL_T_OPTS="--bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
+export FZF_DEFAULT_OPTS="--reverse --border"
+export FZF_TMUX=1
+export TERM="xterm-256color" # to fix rendering issues
+
 #####################
 # Mac Specific Stuff
 #####################
@@ -162,17 +170,6 @@ then
 fi
 
 ######################
-# FZF Options
-######################
-
-export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
-export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
-export FZF_CTRL_T_OPTS="--bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
-export FZF_DEFAULT_OPTS="--reverse --border"
-export FZF_TMUX=1
-export TERM="xterm-256color" # to fix rendering issues
-
-######################
 # Theme
 ######################
 
@@ -188,6 +185,9 @@ RPROMPT="[%@ ]"
 ######################
 # End of file setup
 ######################
+
+# Source oh-my-zsh
+source $ZSH/oh-my-zsh.sh
 
 if [ -f ~/.zshrc_machine ]
 then

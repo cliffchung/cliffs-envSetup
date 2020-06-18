@@ -170,19 +170,6 @@ then
 fi
 
 ######################
-# Theme
-######################
-
-PROMPT='
-$(_user_host)${_current_dir} $(git_prompt_info) $(_ruby_version)
-%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
-
-PROMPT2='%{$fg[$CARETCOLOR]%}<%{$reset_color%} '
-
-# Add a timestamp to the right prompt
-RPROMPT="[%@ ]"
-
-######################
 # End of file setup
 ######################
 
@@ -193,6 +180,23 @@ if [ -f ~/.zshrc_machine ]
 then
     source ~/.zshrc_machine
 fi
+
+######################
+# Theme
+######################
+
+PROMPT='
+$(_user_host)${_current_dir} $(git_prompt_info)
+%{%(!.%F{red}.%F{white})%}>%{$resetcolor%} '
+
+PROMPT2='%{%(!.%F{red}.%F{white})%}<%{$reset_color%} '
+
+# Add a timestamp to the right prompt
+RPROMPT="[%@ ]"
+
+######################
+# Misc
+######################
 
 # Faster directory navigation
 [ -f ~/bin/z/z.sh ] && source ~/bin/z/z.sh

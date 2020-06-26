@@ -50,6 +50,15 @@ Plug 'chikamichi/mediawiki.vim'
 " Syntax highlighting for yaml
 Plug 'avakhov/vim-yaml'
 
+" Auto generate ctags on save
+Plug 'ludovicchabant/vim-gutentags'
+
+" Display tags in a window
+Plug 'majutsushi/tagbar'
+
+" Xcode color scheme
+Plug 'nickaroot/vim-xcode-dark-theme'
+
 " Add plugins to &runtimepath
 call plug#end()
 
@@ -72,7 +81,9 @@ set noequalalways                   " don't resize splits when a buffer is close
 set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
-set ttymouse=xterm2                 " enable the in tmux
+if !has('nvim')
+    set ttymouse=xterm2                 " enable the in tmux
+endif
 set clipboard+=unnamed              " share clipboard
 set fileformat=unix                 " unix file format
 
@@ -84,14 +95,16 @@ set winminheight=0                  " min height of a split window
 set hlsearch                        " enable search highlighting
 set t_Co=256                        " set the terminal color to 256
 set laststatus=2                    " show the status line
+set colorcolumn=120                 " show a vertical column to indicate line limit
 
 " color scheme
 set background=dark
+" colorscheme xcode_dark
+colorscheme gruvbox
 " let ayucolor="dark"
 " colorscheme ayu
 " colorscheme carbonized-dark
 " colorscheme focuspoint
-colorscheme gruvbox
 " colorscheme papercolor
 " colorscheme minimalist
 " colorscheme sierra
@@ -139,12 +152,9 @@ set foldmethod=indent                   " fold based on indent
 set foldlevel=100
 
 " ========== Indentation ==========
-set autoindent
-set smartindent
 set expandtab
-set smarttab
 set tabstop=4
-set softtabstop=0
+set softtabstop=4
 set shiftwidth=4
 
 " =========== Fugitive ===========
@@ -224,7 +234,7 @@ if !exists('g:airline_symbols')
 endif
 
 " Set font when GUI is running
-if has ("gui_running")
+if has ("gui_running") && !has('nvim')
     set guifont=Inconsolata\ for\ Powerline:h14
 endif
 
@@ -234,6 +244,12 @@ nnoremap <leader>a= :Tabularize /=<CR>
 vnoremap <leader>a= :Tabularize /=<CR>
 nnoremap <leader>a: :Tabularize /:\zs<CR>
 vnoremap <leader>a: :Tabularize /:\zs<CR>
+
+" =========== Gutentags ============
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+
+" =========== Tagbar ============
+nmap <leader>t :TagbarToggle<cr>
 
 " ========== Mappings ==========
 
@@ -352,3 +368,9 @@ augroup SyntaxSettings
     autocmd!
     autocmd BufNewFile,BufRead *.tsx set filetype=typescript
 augroup END
+
+" Use the clang format
+autocmd FileType c,cpp setlocal equalprg=clang-format
+
+" ================ NeoVim ========================
+set termguicolors

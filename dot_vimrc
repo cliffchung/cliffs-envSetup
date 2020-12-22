@@ -36,7 +36,8 @@ Plug 'tpope/vim-fugitive'
 " Color schemes
 Plug 'rafi/awesome-vim-colorschemes'
 
-"" Highlighting
+"" Auto casing when search/replace
+Plug 'tpope/vim-abolish'
 
 " Kotlin highlighting
 Plug 'udalov/kotlin-vim'
@@ -73,7 +74,6 @@ let mapleader=','                   " change the leader key to be ,
 set history=1000                    " set a command history
 set hidden                          " allow for buffer to be hidden
 set visualbell                      " no sounds
-set viminfo^=%                      " remember info about buffers on close
 set nowrap                          " turn off word wrap by default (do "set wrap" to turn it on again, or remove this line)
 set ignorecase                      " ignores casing by default
 set smartcase                       " only respects casing when it's used in searching

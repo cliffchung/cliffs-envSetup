@@ -15,9 +15,6 @@ Plug 'vim-airline/vim-airline-themes'
 " Fuzzy completion
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 
-" Make tab key more useful
-Plug 'ervandew/supertab'
-
 " Add easier tmux navigation
 Plug 'christoomey/vim-tmux-navigator'
 
@@ -42,8 +39,8 @@ Plug 'tpope/vim-abolish'
 " Kotlin highlighting
 Plug 'udalov/kotlin-vim'
 
-" TypeScript highlighting
-Plug 'leafgarland/typescript-vim'
+" " TypeScript highlighting
+" Plug 'leafgarland/typescript-vim'
 
 " Syntax highlighting for wiki
 Plug 'chikamichi/mediawiki.vim'
@@ -51,14 +48,19 @@ Plug 'chikamichi/mediawiki.vim'
 " Syntax highlighting for yaml
 Plug 'avakhov/vim-yaml'
 
-" Auto generate ctags on save
-Plug 'ludovicchabant/vim-gutentags'
-
 " Display tags in a window
 Plug 'majutsushi/tagbar'
 
 " Xcode color scheme
 Plug 'nickaroot/vim-xcode-dark-theme'
+
+" " YouCompleteMe
+" Plug 'ycm-core/YouCompleteMe'
+
+" For auto completion
+Plug 'prabirshrestha/vim-lsp'
+Plug 'neoclide/coc.nvim'
+Plug 'clangd/coc-clangd'
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -81,9 +83,6 @@ set noequalalways                   " don't resize splits when a buffer is close
 set backspace=2                     " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
-if !has('nvim')
-    set ttymouse=xterm2                 " enable the in tmux
-endif
 set clipboard+=unnamed              " share clipboard
 set fileformat=unix                 " unix file format
 
@@ -96,9 +95,10 @@ set hlsearch                        " enable search highlighting
 set t_Co=256                        " set the terminal color to 256
 set laststatus=2                    " show the status line
 set colorcolumn=120                 " show a vertical column to indicate line limit
+set number                          " shows current line number
 
 " color scheme
-set background=dark
+" set background=dark
 " colorscheme xcode_dark
 colorscheme gruvbox
 " let ayucolor="dark"
@@ -163,18 +163,6 @@ set shiftwidth=4
 set diffopt+=vertical
 " auto diffupdate when diffput/diffget used
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
-
-" ========== SuperTab ==========
-
-" set tab to invoke the autocomplete menu
-let g:SuperTabDefaultCompletionType = "context"
-
-" make CR select the current entry and don't insert a new line
-let g:SuperTabCrMapping=1
-
-" when tab is hit, don't select the first entry, but insert the longest common text
-" of all matches (longest), also always show the menu even if only one option (menuone)
-set completeopt=longest,menuone
 
 " ========== FZF ==========
 
@@ -245,11 +233,68 @@ vnoremap <leader>a= :Tabularize /=<CR>
 nnoremap <leader>a: :Tabularize /:\zs<CR>
 vnoremap <leader>a: :Tabularize /:\zs<CR>
 
-" =========== Gutentags ============
-let g:gutentags_cache_dir = expand('~/.cache/tags')
-
 " =========== Tagbar ============
 nmap <leader>t :TagbarToggle<cr>
+
+" =========== CoC =============
+
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+nmap <leader>i :CocCommand clangd.switchSourceHeader<CR>
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" cursor hover time until the dialog pops up
+set updatetime=300
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Make <CR> auto-select the first completion item and notify coc.nvim to
+" format on enter, <cr> could be remapped by other vim plugin
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " ========== Mappings ==========
 
@@ -369,8 +414,59 @@ augroup SyntaxSettings
     autocmd BufNewFile,BufRead *.tsx set filetype=typescript
 augroup END
 
-" Use the clang format
-autocmd FileType c,cpp setlocal equalprg=clang-format
+" ================ Hex mode =====================
+" ex command for toggling hex mode - define mapping if desired
+command -bar Hexmode call ToggleHex()
 
-" ================ NeoVim ========================
-set termguicolors
+" helper function to toggle hex mode
+function ToggleHex()
+  " hex mode should be considered a read-only operation
+  " save values for modified and read-only for restoration later,
+  " and clear the read-only flag for now
+  let l:modified=&mod
+  let l:oldreadonly=&readonly
+  let &readonly=0
+  let l:oldmodifiable=&modifiable
+  let &modifiable=1
+  if !exists("b:editHex") || !b:editHex
+    " save old options
+    let b:oldft=&ft
+    let b:oldbin=&bin
+    " set new options
+    setlocal binary " make sure it overrides any textwidth, etc.
+    silent :e " this will reload the file without trickeries
+              "(DOS line endings will be shown entirely )
+    let &ft="xxd"
+    " set status
+    let b:editHex=1
+    " switch to hex editor
+    %!xxd
+  else
+    " restore old options
+    let &ft=b:oldft
+    if !b:oldbin
+      setlocal nobinary
+    endif
+    " set status
+    let b:editHex=0
+    " return to normal editing
+    %!xxd -r
+  endif
+  " restore values for modified and read only state
+  let &mod=l:modified
+  let &readonly=l:oldreadonly
+  let &modifiable=l:oldmodifiable
+endfunction
+
+" vim -b : edit binary using xxd-format!
+augroup Binary
+  au!
+  au BufReadPre  *.bin let &bin=1
+  au BufReadPost *.bin if &bin | %!xxd
+  au BufReadPost *.bin set ft=xxd | endif
+  au BufWritePre *.bin if &bin | %!xxd -r
+  au BufWritePre *.bin endif
+  au BufWritePost *.bin if &bin | %!xxd
+  au BufWritePost *.bin set nomod | endif
+augroup END
+

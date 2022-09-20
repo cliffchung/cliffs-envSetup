@@ -102,16 +102,32 @@ export FZF_DEFAULT_OPTS="--reverse --border"
 export FZF_TMUX=1
 export TERM="xterm-256color" # to fix rendering issues
 
-
 ######################
 # Theme
 ######################
 
-PROMPT='
-$(_user_host)${_current_dir} $(git_prompt_info) $(_ruby_version)
-%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
+function _user_host() {
+  local me
+  if [[ -n $SSH_CONNECTION ]]; then
+    me="%n@%m"
+  elif [[ $LOGNAME != $USERNAME ]]; then
+    me="%n"
+  fi
+  if [[ -n $me ]]; then
+    echo "%{$fg[cyan]%}$me%{$reset_color%}:"
+  fi
+}
 
-PROMPT2='%{$fg[$CARETCOLOR]%}<%{$reset_color%} '
+# settings
+typeset +H _current_dir="%{$fg_bold[blue]%}%3~%{$reset_color%} "
+typeset +H _return_status="%{$fg_bold[red]%}%(?..⍉)%{$reset_color%}"
+typeset +H _hist_no="%{$fg[grey]%}%h%{$reset_color%}"
+
+PROMPT='
+$(_user_host)${_current_dir} 
+%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
+PROMPT2='%{%(!.${fg[red]}.${fg[white]})%}<%{$reset_color%} '
+RPROMPT='$(vi_mode_prompt_info)%{$(echotc UP 1)%} ${_return_status}%{$(echotc DO 1)%}'
 
 ######################
 # Other

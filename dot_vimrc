@@ -98,7 +98,7 @@ set colorcolumn=120                 " show a vertical column to indicate line li
 set number                          " shows current line number
 
 " color scheme
-" set background=dark
+set background=dark
 " colorscheme xcode_dark
 colorscheme gruvbox
 " let ayucolor="dark"

@@ -133,10 +133,5 @@ RPROMPT='$(vi_mode_prompt_info)%{$(echotc UP 1)%} ${_return_status}%{$(echotc DO
 # Other
 ######################
 
-if [[ -f ~/.zshrc_machine ]]
-then
-    source ~/.zshrc_machine
-fi
-
 # Faster directory navigation
 source ~/bin/z/z.sh

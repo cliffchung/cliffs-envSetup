@@ -49,14 +49,14 @@ DISABLE_AUTO_TITLE="true"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git tmux)
+plugins=(git tmux fzf)
 
 #######################################################
 # User configurations
 #######################################################
 
 # Set the path variable appropriately
-export PATH="${HOME}/bin:/usr/local/bin:/usr/local/opt:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+export PATH="${HOME}/bin:/usr/local/bin:/usr/local/opt:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:${PATH}"
 
 ##########################
 # Common ZSH options
@@ -176,10 +176,143 @@ fi
 # Source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-if [ -f ~/.zshrc_machine ]
+######################################################
+# Common zsh configs for all environments
+######################################################
+
+# use emacs bindings, even though we set EDITOR to vi
+bindkey -e
+
+limit coredumpsize 0
+
+setopt NO_NOMATCH
+setopt AUTO_RESUME
+setopt NOTIFY
+setopt NO_PROMPT_CR
+
+#Keep the terminal history around
+setopt APPEND_HISTORY
+
+MAILCHECK=90000 # never
+
+# Set the path variable appropriately
+PATH=~/bin:/usr/local/bin/:${PATH}
+
+######################### zsh options ################################
+setopt ALWAYS_TO_END           # Push that cursor on completions.
+setopt AUTO_NAME_DIRS          # change directories  to variable names
+setopt AUTO_PUSHD              # push directories on every cd
+setopt PUSHD_IGNORE_DUPS       # ignore duplicates in pushd stack
+setopt AUTO_CD                 # automatically cd into directories if typed
+setopt NO_BEEP                 # self explanatory
+
+DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
+
+######################### history options ############################
+setopt EXTENDED_HISTORY     # store time in history
+setopt HIST_VERIFY          # Make those history commands nice
+setopt INC_APPEND_HISTORY   # immediatly insert history into history file
+setopt HIST_FIND_NO_DUPS    # Do not show duplicates when searching through history
+setopt HIST_IGNORE_ALL_DUPS # Ignore duplicate events in history
+setopt NO_SHARE_HISTORY     # do not share the history file between windows
+HISTSIZE=15000              # spots for duplicates/uniques
+SAVEHIST=15000              # unique events guarenteed
+HISTFILE=~/.history
+FIGNORE=".o:~"
+WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+
+hostcmds=(rlogin rcp) # zsh knows about telnet, ftp, etc
+compctl -v setenv
+compctl -K module_complete cdm
+compctl -K bz_module_complete cdb
+
+autoload -Uz compinit && compinit
+
+bindkey "^R" history-incremental-search-backward
+bindkey "^E" end-of-line
+bindkey "^A" beginning-of-line
+bindkey "^T" push-line-or-edit
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
+
+#################
+# Aliases
+#################
+
+# Bash aliases
+alias echo="echo -e" # allows for backslash escaped characters
+
+# Standard aliases
+alias u='cd ../'
+alias uu='cd ../../'
+alias uuu='cd ../../../'
+alias uuuu='cd ../../../../'
+alias uuuuu='cd ../../../../../'
+alias ll='ls -lah'
+
+#####################
+# Mac Specific Stuff
+#####################
+
+if [[ $OSTYPE =~ "darwin" ]]
 then
-    source ~/.zshrc_machine
+    # enable coloring in terminal
+    export CLICOLOR=1
+    export LSCOLORS=FxFxCxDxBxegedabagacad
+
+    alias gvim='open -a MacVim.app'
+    alias netstat="sudo lsof -i -P"
+
+    #Mac OSX/BSD bindings for Home/End/Del
+    bindkey "^[[H" beginning-of-line
+    bindkey "^[[F" end-of-line
+    bindkey "^[[3~" delete-char
 fi
+
+######################
+# FZF Options
+######################
+
+export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+export FZF_CTRL_T_OPTS="--bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
+export FZF_DEFAULT_OPTS="--reverse --border"
+export FZF_TMUX=1
+export TERM="xterm-256color" # to fix rendering issues
+
+######################
+# Theme
+######################
+
+function _user_host() {
+  local me
+  if [[ -n $SSH_CONNECTION ]]; then
+    me="%n@%m"
+  elif [[ $LOGNAME != $USERNAME ]]; then
+    me="%n"
+  fi
+  if [[ -n $me ]]; then
+    echo "%{$fg[cyan]%}$me%{$reset_color%}:"
+  fi
+}
+
+# settings
+typeset +H _current_dir="%{$fg_bold[blue]%}%3~%{$reset_color%} "
+typeset +H _return_status="%{$fg_bold[red]%}%(?..⍉)%{$reset_color%}"
+typeset +H _hist_no="%{$fg[grey]%}%h%{$reset_color%}"
+
+PROMPT='
+$(_user_host)${_current_dir} 
+%{$fg[$CARETCOLOR]%}>%{$resetcolor%} '
+PROMPT2='%{%(!.${fg[red]}.${fg[white]})%}<%{$reset_color%} '
+RPROMPT='$(vi_mode_prompt_info)%{$(echotc UP 1)%} ${_return_status}%{$(echotc DO 1)%}'
+
+######################
+# Other
+######################
+
+# Faster directory navigation
+source ~/bin/z/z.sh
 
 ######################
 # Theme

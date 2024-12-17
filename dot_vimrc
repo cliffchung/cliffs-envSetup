@@ -39,7 +39,10 @@ Plug 'tpope/vim-abolish'
 " Kotlin highlighting
 Plug 'udalov/kotlin-vim'
 
-" " TypeScript highlighting
+" Rust highlighting
+Plug 'rust-lang/rust.vim'
+
+" " " TypeScript highlighting
 " Plug 'leafgarland/typescript-vim'
 
 " Syntax highlighting for wiki
@@ -48,19 +51,32 @@ Plug 'chikamichi/mediawiki.vim'
 " Syntax highlighting for yaml
 Plug 'avakhov/vim-yaml'
 
+" Swift repo
+Plug 'swiftlang/swift', { 'rtp': 'utils/vim' }
+
 " Display tags in a window
 Plug 'majutsushi/tagbar'
 
 " Xcode color scheme
 Plug 'nickaroot/vim-xcode-dark-theme'
 
-" " YouCompleteMe
+" YouCompleteMe
 " Plug 'ycm-core/YouCompleteMe'
 
-" For auto completion
+" To escape ANSI escape sequences
+Plug 'powerman/vim-plugin-AnsiEsc'
+
+" Smithy
+Plug 'jasdel/vim-smithy'
+
+" " For auto completion
+Plug 'mattn/vim-lsp-settings'
 Plug 'prabirshrestha/vim-lsp'
-Plug 'neoclide/coc.nvim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'clangd/coc-clangd'
+
+" For linting
+Plug 'dense-analysis/ale'
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -85,6 +101,7 @@ set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
 set clipboard+=unnamed              " share clipboard
 set fileformat=unix                 " unix file format
+set regexpengine=0                  " explicitly set the regex engine in OSX
 
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting
@@ -176,7 +193,7 @@ nnoremap <silent> <Leader>v :call fzf#run({
             \   'right': winwidth('.') / 2,
             \   'sink':  'vertical botright split' })<CR>
 
-imap <C-x><C-f> <plug>(fzf-complete-file-ag)
+imap <C-x><C-f> <plug>(fzf-complete-file)
 imap <C-x><C-l> <plug>(fzf-complete-line)
 
 " Fuzzy file finder
@@ -195,6 +212,13 @@ let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 
 nnoremap <silent> <C-t> :FZF<cr>
+
+" Global line completion (not just open buffers. ripgrep required.)
+inoremap <expr> <c-x><c-l> fzf#vim#complete(fzf#wrap({
+  \ 'prefix': '^.*$',
+  \ 'source': 'rg -n ^ --color always',
+  \ 'options': '--ansi --delimiter : --nth 3..',
+  \ 'reducer': { lines -> join(split(lines[0], ':\zs')[2:], '') }}))
 
 " ========== rip-grep =============
 
@@ -234,58 +258,64 @@ nnoremap <leader>a: :Tabularize /:\zs<CR>
 vnoremap <leader>a: :Tabularize /:\zs<CR>
 
 " =========== Tagbar ============
+
 nmap <leader>t :TagbarToggle<cr>
 
 " =========== CoC =============
 
-" Don't pass messages to |ins-completion-menu|.
-set shortmess+=c
+let g:ycm_filetype_blacklist = {
+            \ 'vim': 1,
+            \ 'lua': 1,
+            \ 'json': 1,
+            \ 'smithy': 1,
+            \ 'gitcommit': 1,
+            \ }
 
-" GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-nmap <leader>i :CocCommand clangd.switchSourceHeader<CR>
-nmap <leader>rn <Plug>(coc-rename)
+autocmd BufNew,BufNewFile,BufRead .kts,.gradle setlocal ft=groovy
 
-" Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-" Use tab for trigger completion with characters ahead and navigate.
+" Use tab for trigger completion with characters ahead and navigate
+" NOTE: There's always complete item selected by default, you may want to enable
+" no select by `"suggest.noselect": true` in your configuration file
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
+" other plugin before putting this into your config
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
       \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-function! s:check_back_space() abort
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-" cursor hover time until the dialog pops up
-set updatetime=300
-
-" Use <c-space> to trigger completion.
+" Use <c-space> to trigger completion
 if has('nvim')
   inoremap <silent><expr> <c-space> coc#refresh()
 else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
 
-" Make <CR> auto-select the first completion item and notify coc.nvim to
-" format on enter, <cr> could be remapped by other vim plugin
-inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
-" Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+" GoTo code navigation
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 
-function! s:show_documentation()
+" Use K to show documentation in preview window
+nnoremap <silent> K :call ShowDocumentation()<CR>
+
+function! ShowDocumentation()
   if CocAction('hasProvider', 'hover')
     call CocActionAsync('doHover')
   else
@@ -293,8 +323,43 @@ function! s:show_documentation()
   endif
 endfunction
 
-" Highlight the symbol and its references when holding the cursor.
+" Highlight the symbol and its references when holding the cursor
 autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s)
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Applying code actions to the selected code block
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying code actions at the cursor position
+nmap <leader>ac  <Plug>(coc-codeaction-cursor)
+" Remap keys for apply code actions affect whole buffer
+nmap <leader>as  <Plug>(coc-codeaction-source)
+" Apply the most preferred quickfix action to fix diagnostic on the current line
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Remap keys for applying refactor code actions
+nmap <silent> <leader>re <Plug>(coc-codeaction-refactor)
+xmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
+nmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
+
+" Run the Code Lens action on the current line
+nmap <leader>cl  <Plug>(coc-codelens-action)
 
 " ========== Mappings ==========
 
@@ -344,7 +409,7 @@ nnoremap <C-W>o :call MaximizeToggle()<CR>
 vnoremap <leader>x :s/>\s*</>\r</g<CR>
 
 " Map <leader>j to prettify selected json
-vnoremap <leader>j :!python -m json.tool<CR>
+vnoremap <leader>j :!python3 -m json.tool<CR>
 
 " ========== Functions ==========
 
@@ -389,7 +454,42 @@ function! MaximizeToggle()
   endif
 endfunction
 
+" ========== Ale ===========
+
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\}
+
+" Set this variable to 1 to fix files when you save them.
+let g:ale_fix_on_save = 1
+
+" Enable completion where available.
+" This setting must be set before ALE is loaded.
+"
+" You should not turn this setting on if you wish to use ALE as a completion
+" source for other completion plugins, like Deoplete.
+let g:ale_completion_enabled = 1
+
+set omnifunc=ale#completion#OmniFunc
+set omnifunc=syntaxcomplete#Complete
+
+"if executable('sourcekit-lsp') " HAD TO USE FULL PATH TO EXECUTABLE
+"    au! User lsp_setup call lsp#register_server({
+"                \ 'name': 'sourcekit-lsp',
+"                \ 'cmd': {server_info->['sourcekit-lsp']}, " HAD TO USE FULL PATH TO EXECUTABLE
+"                \ 'whitelist': ['swift'],
+"                \ })
+"endif
+
+" ========== File Fpecific Customizations ==========
+
+autocmd Filetype yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2
+
 " ========== Special Customizations ==========
+
+" Change to thin cursor on insert mode
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
 
 " don't insert comment automatically on new line
 autocmd BufRead,BufNewFile * set formatoptions-=cro
@@ -408,11 +508,11 @@ autocmd BufReadPost *
 " highlight trailing whitespaces and also tab characters
 highlight ExtraWhitespace ctermbg=grey guibg=grey
 
-" Use typescript formatting for tsx files
-augroup SyntaxSettings
-    autocmd!
-    autocmd BufNewFile,BufRead *.tsx set filetype=typescript
-augroup END
+" " Use typescript formatting for tsx files
+" augroup SyntaxSettings
+"     autocmd!
+"     autocmd BufNewFile,BufRead *.tsx set filetype=typescript
+" augroup END
 
 " ================ Hex mode =====================
 " ex command for toggling hex mode - define mapping if desired
@@ -469,4 +569,3 @@ augroup Binary
   au BufWritePost *.bin if &bin | %!xxd
   au BufWritePost *.bin set nomod | endif
 augroup END
-

@@ -1,217 +1,310 @@
-#!/bin/bash
-# copies all config files to the home directory
+#!/usr/bin/env bash
+# Portable dotfiles installer — works on macOS and Linux
+set -euo pipefail
 
 ##################
 # Setup variables
 ##################
-ROOT_DIR=~
-BACKUP_DIR=~/dot_backup.`date +"%Y-%h-%d_%H.%M.%S"`
-BIN_DIR=${ROOT_DIR}/bin
+ROOT_DIR="${HOME}"
+BACKUP_DIR="${ROOT_DIR}/dot_backup.$(date +"%Y-%h-%d_%H.%M.%S")"
+BIN_DIR="${ROOT_DIR}/bin"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-DOT_FILES_TO_COPY=`find . -maxdepth 1 -type f -name "dot_*"`
-DOT_DIRECTORIES_TO_COPY=`find . -maxdepth 1 -type d \( ! -name "\.*" ! -name "ssh" \)` # exclude the ssh directory
+# Detect OS
+OS="$(uname -s)"
+case "${OS}" in
+    Darwin) IS_MAC=true;  IS_LINUX=false ;;
+    Linux)  IS_MAC=false; IS_LINUX=true  ;;
+    *)      echo "Unsupported OS: ${OS}"; exit 1 ;;
+esac
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+############
+# Helpers
+############
+
+info()    { echo -e "${GREEN}[INFO]${NC} $*"; }
+warn()    { echo -e "${YELLOW}[WARN]${NC} $*"; }
+error()   { echo -e "${RED}[ERROR]${NC} $*"; }
+
+command_exists() { command -v "$1" &> /dev/null; }
+
+# Install a package via the system package manager
+pkg_install() {
+    local pkg="$1"
+    if ${IS_MAC}; then
+        if ! brew list "$pkg" &> /dev/null; then
+            info "Installing ${pkg} via brew..."
+            brew install "$pkg"
+        else
+            info "${pkg} already installed, skipping"
+        fi
+    elif ${IS_LINUX}; then
+        if ! dpkg -s "$pkg" &> /dev/null 2>&1; then
+            info "Installing ${pkg} via apt..."
+            sudo apt-get install -y "$pkg"
+        else
+            info "${pkg} already installed, skipping"
+        fi
+    fi
+}
 
 ############
 # Functions
 ############
 
-makeBackupDirectory()
-{
-    # make the backup directory only if it doesn't exist
-    if [ ! -d $BACKUP_DIR ]
-    then
-        echo "Creating directory $BACKUP_DIR"
-        mkdir $BACKUP_DIR
+make_backup_directory() {
+    if [[ ! -d "${BACKUP_DIR}" ]]; then
+        info "Creating backup directory ${BACKUP_DIR}"
+        mkdir -p "${BACKUP_DIR}"
     fi
 }
 
 copy_dot_files() {
-    echo -e "\n"
-    echo -e "Copying files"
-    echo -e "-------------"
+    echo ""
+    info "Copying dotfiles"
+    echo "-------------------"
 
-    for file in $DOT_FILES_TO_COPY;
-    do
-        fileToCopy=$(basename $file)
-        newFileName=`echo $fileToCopy | sed "s/dot_/./"`
+    # Files to skip (not installed as dotfiles)
+    local skip_files=("dot_zshrc_custom")
 
-        if [ -a $ROOT_DIR/$newFileName ]
-        then
-            makeBackupDirectory
-            backupFileName=`echo $newFileName | sed "s/^\./dot_/"`
-            echo "backing up $ROOT_DIR/$newFileName to $BACKUP_DIR/$backupFileName"
-            cp $ROOT_DIR/$newFileName $BACKUP_DIR/$backupFileName
+    while IFS= read -r -d '' file; do
+        local filename
+        filename="$(basename "$file")"
+        local new_filename="${filename/dot_/.}"
+
+        # Check skip list
+        local skip=false
+        for s in "${skip_files[@]}"; do
+            if [[ "${filename}" == "${s}" ]]; then
+                skip=true
+                break
+            fi
+        done
+        ${skip} && continue
+
+        # Backup existing file
+        if [[ -e "${ROOT_DIR}/${new_filename}" ]]; then
+            make_backup_directory
+            local backup_name="${new_filename/#./dot_}"
+            info "Backing up ${ROOT_DIR}/${new_filename} -> ${BACKUP_DIR}/${backup_name}"
+            cp "${ROOT_DIR}/${new_filename}" "${BACKUP_DIR}/${backup_name}"
         fi
-        echo "copying $fileToCopy to $ROOT_DIR/$newFileName"
-        cp $fileToCopy $ROOT_DIR/$newFileName
-    done
+
+        info "Installing ${filename} -> ${ROOT_DIR}/${new_filename}"
+        cp "${file}" "${ROOT_DIR}/${new_filename}"
+    done < <(find "${SCRIPT_DIR}" -maxdepth 1 -type f -name "dot_*" -print0)
 }
 
-copy_dot_directories() {
-    echo -e "\n"
-    echo -e "Copying directories"
-    echo -e "-------------------"
+install_homebrew() {
+    if ! ${IS_MAC}; then return 0; fi
 
-    for dir in $DOT_DIRECTORIES_TO_COPY;
-    do
-        dirToCopy=$(basename $dir)
-        newDirName=`echo $dirToCopy | sed "s/dot_/./"`
-
-        if [ -d $ROOT_DIR/$newDirName ]
-        then
-            makeBackupDirectory
-            backupDirName=`echo $newDirName | sed "s/^\./dot_/"`
-            echo "backing up $ROOT_DIR/$newDirName to $BACKUP_DIR/$backupDirName"
-            cp -r $ROOT_DIR/$newDirName $BACKUP_DIR/$backupDirName
-        fi
-        echo "copying $dirToCopy to $ROOT_DIR/$newDirName"
-        cp -r $dirToCopy $ROOT_DIR/$newDirName
-    done
-}
-
-setup_vim_plugins() {
-    echo "Setting up vim plugins"
-    local VIM_PLUG="${ROOT_DIR}/.vim/autoload/plug.vim"
-
-    if [ -f "${VIM_PLUG}" ]; then
-        echo "Vim plugins already setup, skipping installation"
+    if command_exists brew; then
+        info "Homebrew already installed, skipping"
         return 0
     fi
 
-    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    vim +PlugInstall +qall
-}
-
-install_brew() {
-    echo "Setting up homebrew"
-
-    if hash brew 2>/dev/null; then
-        echo "Brew already setup, skipping installation"
-        return 0
-    fi
-
+    info "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Ensure brew is on PATH for the rest of this script
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+}
+
+install_apt_essentials() {
+    if ! ${IS_LINUX}; then return 0; fi
+
+    info "Updating apt package list..."
+    sudo apt-get update -qq
+
+    local packages=(git curl zsh vim tmux ripgrep fzf xclip)
+    for pkg in "${packages[@]}"; do
+        pkg_install "$pkg"
+    done
 }
 
 install_vim() {
-    echo "Setting up vim"
+    if command_exists vim; then
+        info "vim already installed, skipping"
+        return 0
+    fi
+    pkg_install vim
+}
 
-    if brew ls --versions vim > /dev/null; then
-        echo "vim already setup, skipping installation"
+install_vim_plug() {
+    info "Setting up vim-plug"
+    local vim_plug="${ROOT_DIR}/.vim/autoload/plug.vim"
+
+    if [[ -f "${vim_plug}" ]]; then
+        info "vim-plug already installed, skipping"
         return 0
     fi
 
-    brew install vim
+    curl -fLo "${vim_plug}" --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    info "Running :PlugInstall..."
+    vim +PlugInstall +qall
 }
 
 install_oh_my_zsh() {
-    echo "Setting up oh-my-zsh"
-    local OH_MY_ZSH_DIR="${ROOT_DIR}/.oh-my-zsh"
+    info "Setting up oh-my-zsh"
+    local omz_dir="${ROOT_DIR}/.oh-my-zsh"
 
-    if [ -d "${OH_MY_ZSH_DIR}" ]; then
-        echo "oh-my-zsh already setup, skipping installation"
+    if [[ -d "${omz_dir}" ]]; then
+        info "oh-my-zsh already installed, skipping"
         return 0
     fi
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    # RUNZSH=no prevents oh-my-zsh from launching zsh after install
+    RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+}
 
-    echo "Installing zsh-syntax-highlighting"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+install_zsh_syntax_highlighting() {
+    info "Setting up zsh-syntax-highlighting"
+
+    if ${IS_MAC}; then
+        if brew list zsh-syntax-highlighting &> /dev/null; then
+            info "zsh-syntax-highlighting already installed, skipping"
+            return 0
+        fi
+        brew install zsh-syntax-highlighting
+    elif ${IS_LINUX}; then
+        local zsh_hl_dir="${ROOT_DIR}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+        if [[ -d "${zsh_hl_dir}" ]]; then
+            info "zsh-syntax-highlighting already installed, skipping"
+            return 0
+        fi
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${zsh_hl_dir}"
+    fi
 }
 
 install_tmux() {
-    echo "Setting up tmux"
+    if command_exists tmux; then
+        info "tmux already installed, skipping"
+    else
+        pkg_install tmux
+    fi
 
-    if hash tmux 2>/dev/null; then
-        echo "tmux already installed, skipping installation"
+    # Install TPM
+    local tpm_dir="${ROOT_DIR}/.tmux/plugins/tpm"
+    if [[ -d "${tpm_dir}" ]]; then
+        info "TPM already installed, skipping"
         return 0
     fi
 
-    brew install tmux
-
-    local TPM_DIR="~/.tmux/plugins/tpm"
-    if [ ! -d ${TPM_DIR} ]; then
-        echo "Setting up TPM"
-        git clone https://github.com/tmux-plugins/tpm ${TPM_DIR}
-    fi
+    info "Installing TPM (Tmux Plugin Manager)..."
+    git clone https://github.com/tmux-plugins/tpm "${tpm_dir}"
+    info "Run 'prefix + I' inside tmux to install plugins"
 }
 
 install_powerline_fonts() {
-    echo "Setting up powerline fonts"
-    local FONTS_DIR="${BIN_DIR}/powerline_fonts"
+    info "Setting up powerline fonts"
+    local fonts_dir="${BIN_DIR}/powerline_fonts"
 
-    if [ -d "${FONTS_DIR}" ]; then
-        echo "Powerline fonts already setup, skipping installation"
+    if [[ -d "${fonts_dir}" ]]; then
+        info "Powerline fonts already installed, skipping"
         return 0
     fi
 
-    git clone https://github.com/powerline/fonts.git ${FONTS_DIR}
-    ${FONTS_DIR}/install.sh
+    git clone https://github.com/powerline/fonts.git "${fonts_dir}"
+    "${fonts_dir}/install.sh"
 }
 
-install_rip_grep() {
-    echo "Setting up ripgrep"
-
-    if brew ls --versions ripgrep > /dev/null; then
-        echo "ripgrep already setup, skipping installation"
+install_ripgrep() {
+    if command_exists rg; then
+        info "ripgrep already installed, skipping"
         return 0
     fi
-
-    brew install ripgrep
-}
-
-install_z() {
-    echo "Setting up z"
-    local Z_DIR="${BIN_DIR}/z"
-
-    if [ -d "${Z_DIR}" ]; then
-        echo "z already setup, skipping installation"
-        return 0
-    fi
-
-    git clone https://github.com/rupa/z.git ${Z_DIR}
+    pkg_install ripgrep
 }
 
 install_fzf() {
-    echo "Setting up fzf"
-
-    if brew ls --versions fzf > /dev/null; then
-        echo "fzf already setup, skipping installation"
+    if command_exists fzf; then
+        info "fzf already installed, skipping"
         return 0
     fi
 
-    brew install fzf
-    $(brew --prefix)/opt/fzf/install
+    if ${IS_MAC}; then
+        brew install fzf
+        "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc
+    elif ${IS_LINUX}; then
+        pkg_install fzf
+    fi
+}
+
+set_default_shell() {
+    if [[ "${SHELL}" == */zsh ]]; then
+        info "Default shell is already zsh, skipping"
+        return 0
+    fi
+
+    local zsh_path
+    zsh_path="$(which zsh)"
+
+    if [[ -z "${zsh_path}" ]]; then
+        warn "zsh not found, skipping default shell change"
+        return 0
+    fi
+
+    # Ensure zsh is in /etc/shells
+    if ! grep -q "${zsh_path}" /etc/shells 2>/dev/null; then
+        info "Adding ${zsh_path} to /etc/shells"
+        echo "${zsh_path}" | sudo tee -a /etc/shells > /dev/null
+    fi
+
+    info "Changing default shell to zsh..."
+    chsh -s "${zsh_path}"
 }
 
 ################
-# Actual script
+# Main
 ################
 
-echo "Setting up environment"
-echo "======================"
+echo "=============================="
+echo "  Environment Setup"
+echo "  OS: ${OS}"
+echo "=============================="
+echo ""
 
-# Setup directories
-if [ ! -d "${BIN_DIR}" ]; then
-    mkdir ${BIN_DIR}
-fi
+# Create bin directory
+mkdir -p "${BIN_DIR}"
 
-# Install useful tools first
-install_brew
+# Install package manager (brew on macOS, update apt on Linux)
+install_homebrew
+install_apt_essentials
+
+# Install tools
 install_vim
 install_oh_my_zsh
 install_tmux
 install_powerline_fonts
-install_rip_grep
-install_z
+install_ripgrep
 install_fzf
+install_zsh_syntax_highlighting
 
-setup_vim_plugins
-
-# Do these after installation steps so we have our own configurations
+# Copy dotfiles (do this AFTER tools are installed so our configs take effect)
 copy_dot_files
-copy_dot_directories
 
-echo -e "\n\n"
-echo "Finished!"
+# Install vim plugins (do this AFTER dotfiles are copied so vimrc is in place)
+install_vim_plug
+
+# Set zsh as default shell
+set_default_shell
+
+echo ""
+info "Setup complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Edit ~/.gitconfig and set your [user] name and email"
+echo "  2. Open a new terminal (or run: source ~/.zshrc)"
+echo "  3. Inside tmux, press 'C-a I' to install tmux plugins"
+echo "  4. In vim, run :CocInstall coc-clangd (and any other CoC extensions you need)"

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(bash -n setup_environment.sh)",
+      "Bash(./setup_environment.sh 2>&1)"
+    ]
+  }
+}

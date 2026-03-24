@@ -1,123 +1,75 @@
-# Path to your oh-my-zsh installation.
+# Path to oh-my-zsh installation
 export ZSH=~/.oh-my-zsh
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
+# Theme
 ZSH_THEME="avit"
 
-# Uncomment the following line to use case-sensitive completion.
-CASE_SENSITIVE="false"
-
-# Uncomment the following line to use hyphen-insensitive completion. Case
-# sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-export UPDATE_ZSH_DAYS=30
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
+# Disable auto-setting terminal title (managed via tmux)
 DISABLE_AUTO_TITLE="true"
 
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+# Auto-update every 30 days
+export UPDATE_ZSH_DAYS=30
 
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+# Plugins
+plugins=(tmux fzf git)
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(tmux fzf)
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-export PATH="${HOME}/bin:${HOME}/.toolbox/bin/:/usr/local/bin:/usr/local/opt:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:~/.cargo/bin:${PATH}"
-
-# TMUX Configs
+# TMUX auto-start config
 ZSH_TMUX_AUTOSTART=true
 ZSH_TMUX_AUTOSTART_ONCE=true
 ZSH_TMUX_FIXTERM=true
 ZSH_TMUX_AUTOCONNECT=true
 ZSH_TMUX_AUTOQUIT=false
 
+# PATH (deduplicated via typeset -U)
+export PATH="${HOME}/bin:${HOME}/.toolbox/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
+typeset -U path
+
+# Editor
+export EDITOR=vim
+export VISUAL=vim
+
+# Source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-
-# use emacs bindings, even though we set EDITOR to vi
+# Use emacs keybindings
 bindkey -e
 
-limit coredumpsize 0
-
-setopt NO_NOMATCH
-setopt AUTO_RESUME
-setopt NOTIFY
-setopt NO_PROMPT_CR
-
-#Keep the terminal history around
-setopt APPEND_HISTORY
-
-MAILCHECK=90000 # never
-
 ######################### zsh options ################################
-setopt ALWAYS_TO_END           # Push that cursor on completions.
-setopt AUTO_NAME_DIRS          # change directories  to variable names
-setopt AUTO_PUSHD              # push directories on every cd
-setopt PUSHD_IGNORE_DUPS       # ignore duplicates in pushd stack
-setopt AUTO_CD                 # automatically cd into directories if typed
-setopt NO_BEEP                 # self explanatory
+setopt NO_NOMATCH              # Allow globs that match nothing
+setopt AUTO_RESUME             # Resume background jobs on exact match
+setopt NOTIFY                  # Report background job status immediately
+setopt NO_PROMPT_CR            # Don't print a CR before the prompt
+setopt ALWAYS_TO_END           # Move cursor to end on completion
+setopt AUTO_NAME_DIRS          # Named directories from parameters
+setopt AUTO_PUSHD              # Push directories on every cd
+setopt PUSHD_IGNORE_DUPS       # No duplicates in pushd stack
+setopt AUTO_CD                 # cd by typing directory name
+setopt NO_BEEP                 # No terminal bell
 
-DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
+DIRSTACKSIZE=20
 
 ######################### history options ############################
-setopt EXTENDED_HISTORY     # store time in history
-setopt HIST_VERIFY          # Make those history commands nice
-setopt INC_APPEND_HISTORY   # immediatly insert history into history file
-setopt HIST_FIND_NO_DUPS    # Do not show duplicates when searching through history
-setopt HIST_IGNORE_ALL_DUPS # Ignore duplicate events in history
-setopt NO_SHARE_HISTORY     # do not share the history file between windows
-HISTSIZE=15000              # spots for duplicates/uniques
-SAVEHIST=15000              # unique events guarenteed
+setopt EXTENDED_HISTORY        # Store timestamps in history
+setopt HIST_VERIFY             # Expand history before executing
+setopt INC_APPEND_HISTORY      # Write to history file immediately
+setopt HIST_IGNORE_ALL_DUPS    # Remove older duplicate entries
+setopt NO_SHARE_HISTORY        # Don't share history between sessions
+
+HISTSIZE=50000
+SAVEHIST=50000
 HISTFILE=~/.history
 FIGNORE=".o:~"
 WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 
-hostcmds=(rlogin rcp) # zsh knows about telnet, ftp, etc
-compctl -v setenv
-compctl -K module_complete cdm
-compctl -K bz_module_complete cdb
-
-#autoload -Uz compinit && compinit
-autoload -Uz compinit 
+######################### completion #################################
+autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
 	compinit;
 else
 	compinit -C;
 fi;
 
+######################### keybindings ################################
 bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
@@ -125,95 +77,84 @@ bindkey "^T" push-line-or-edit
 bindkey '^P' up-line-or-history
 bindkey '^N' down-line-or-history
 
-#################
-# Aliases
-#################
-
-# Bash aliases
-alias echo="echo -e" # allows for backslash escaped characters
-
-# Standard aliases
+######################### aliases ####################################
 alias u='cd ../'
 alias uu='cd ../../'
 alias uuu='cd ../../../'
 alias uuuu='cd ../../../../'
-alias uuuuu='cd ../../../../../'
 alias ll='ls -lah'
 
-#####################
-# Mac Specific Stuff
-#####################
-
-if [[ $OSTYPE =~ "darwin" ]]
-then
-    # enable coloring in terminal
+######################### macOS ######################################
+if [[ $OSTYPE =~ "darwin" ]]; then
     export CLICOLOR=1
-    export LSCOLORS=FxFxCxDxBxegedabagacad
+    export LSCOLORS=gxfxcxdxcxDxDxabagacad
 
     alias gvim='open -a MacVim.app'
     alias netstat="sudo lsof -i -P"
 
-    #Mac OSX/BSD bindings for Home/End/Del
     bindkey "^[[H" beginning-of-line
     bindkey "^[[F" end-of-line
     bindkey "^[[3~" delete-char
 fi
 
-######################
-# FZF Options
-######################
-
-export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
+######################### fzf ########################################
+export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
-export FZF_CTRL_T_OPTS="--bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
+export FZF_CTRL_T_OPTS="--preview 'head -100 {}' --bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
 export FZF_DEFAULT_OPTS="--reverse --border"
 export FZF_TMUX=1
-export TERM="xterm-256color" # to fix rendering issues
 
-######################
-# Theme
-######################
+######################### prompt #####################################
+function _user_host() {
+  local me
+  if [[ -n $SSH_CONNECTION ]]; then
+    me="%n@%m"
+  elif [[ $LOGNAME != $USERNAME ]]; then
+    me="%n"
+  fi
+  if [[ -n $me ]]; then
+    echo "%{$fg[cyan]%}$me%{$reset_color%}:"
+  fi
+}
+
+typeset +H _current_dir="%{$fg_bold[blue]%}%3~%{$reset_color%} "
+typeset +H _return_status="%{$fg_bold[red]%}%(?..⍉)%{$reset_color%}"
 
 PROMPT='
-$(_user_host)${_current_dir}  
+$(_user_host)${_current_dir}${_return_status}
 %{%(!.%F{red}.%F{white})%}>%{$resetcolor%} '
 
 PROMPT2='%{%(!.%F{red}.%F{white})%}<%{$reset_color%} '
 
-# Add a timestamp to the right prompt
-# RPROMPT="[%@ ]"
 RPROMPT=""
 
-######################
-# End of file setup
-######################
+######################### end-of-file setup ##########################
 
-eval "$(rbenv init - zsh)"
-
-if [ -f ~/.zshrc_machine ]
-then
-    source ~/.zshrc_machine
+# rbenv (if installed)
+if command -v rbenv &> /dev/null; then
+    eval "$(rbenv init - zsh)"
 fi
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# Machine-specific overrides
+[[ -f ~/.zshrc_machine ]] && source ~/.zshrc_machine
 
-# zsh-syntax-highlighting
-# This must be kept at the end
-# https://github.com/zsh-users/zsh-syntax-highlighting/
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /Users/ctschung/.brazil_completion/zsh_completion
+# fzf keybindings and completion
+[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/ctschung/bin/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/ctschung/bin/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/ctschung/bin/miniconda3/etc/profile.d/conda.sh"
+# conda (if installed)
+if [[ -f "${HOME}/bin/miniconda3/bin/conda" ]]; then
+    __conda_setup="$("${HOME}/bin/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
     else
-        export PATH="/Users/ctschung/bin/miniconda3/bin:$PATH"
+        [[ -f "${HOME}/bin/miniconda3/etc/profile.d/conda.sh" ]] && . "${HOME}/bin/miniconda3/etc/profile.d/conda.sh"
     fi
+    unset __conda_setup
 fi
-unset __conda_setup
-# <<< conda initialize <<<
+
+# zsh-syntax-highlighting (must be last)
+if [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ -f ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi

@@ -122,7 +122,7 @@ typeset +H _return_status="%{$fg_bold[red]%}%(?..⍉)%{$reset_color%}"
 
 PROMPT='
 $(_user_host)${_current_dir}${_return_status}
-%{%(!.%F{red}.%F{white})%}>%{$resetcolor%} '
+%{%(!.%F{red}.%F{white})%}>%{$reset_color%} '
 
 PROMPT2='%{%(!.%F{red}.%F{white})%}<%{$reset_color%} '
 

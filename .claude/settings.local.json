@@ -3,7 +3,9 @@
     "allow": [
       "Bash(chmod:*)",
       "Bash(bash -n setup_environment.sh)",
-      "Bash(./setup_environment.sh 2>&1)"
+      "Bash(./setup_environment.sh 2>&1)",
+      "Read(//Users/cliffchung/.vim/plugged/coc.nvim/**)",
+      "Bash(npm --version)"
     ]
   }
 }

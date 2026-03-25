@@ -21,6 +21,10 @@
     algorithm = histogram
 [merge]
     conflictstyle = diff3
+[fetch]
+    prune = true
+[rebase]
+    autoStash = true
 [rerere]
     enabled = true
 [alias]
@@ -32,5 +36,7 @@
     unstage = reset HEAD --
     last = log -1 HEAD --stat
     amend = commit --amend --no-edit
-[credential]
-    helper = osxkeychain
+# Credential helper is set per-machine (osxkeychain on macOS, cache on Linux)
+# The setup script configures this automatically
+[include]
+    path = ~/.gitconfig_local

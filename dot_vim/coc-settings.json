@@ -1,0 +1,12 @@
+{
+  "suggest.noselect": true,
+  "suggest.enablePreselect": false,
+  "suggest.triggerAfterInsertEnter": false,
+  "diagnostic.displayByAle": true,
+  "diagnostic.enable": true,
+  "coc.preferences.formatOnSave": false,
+  "signature.enable": true,
+  "hover.floatConfig": {
+    "border": true
+  }
+}

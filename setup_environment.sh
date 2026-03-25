@@ -71,7 +71,7 @@ copy_dot_files() {
     echo "-------------------"
 
     # Files to skip (not installed as dotfiles)
-    local skip_files=("dot_zshrc_custom")
+    local skip_files=("dot_zshrc_custom" "dot_zshrc_machine")
 
     while IFS= read -r -d '' file; do
         local filename
@@ -99,6 +99,25 @@ copy_dot_files() {
         info "Installing ${filename} -> ${ROOT_DIR}/${new_filename}"
         cp "${file}" "${ROOT_DIR}/${new_filename}"
     done < <(find "${SCRIPT_DIR}" -maxdepth 1 -type f -name "dot_*" -print0)
+
+    # Copy dotfile directories (dot_vim -> .vim, etc.)
+    while IFS= read -r -d '' dir; do
+        local dirname
+        dirname="$(basename "$dir")"
+        local new_dirname="${dirname/dot_/.}"
+
+        if [[ -d "${ROOT_DIR}/${new_dirname}" ]]; then
+            make_backup_directory
+            info "Backing up ${ROOT_DIR}/${new_dirname} -> ${BACKUP_DIR}/${dirname}"
+            cp -r "${ROOT_DIR}/${new_dirname}" "${BACKUP_DIR}/${dirname}"
+        fi
+
+        info "Installing ${dirname}/ -> ${ROOT_DIR}/${new_dirname}/"
+        mkdir -p "${ROOT_DIR}/${new_dirname}"
+        # Use trailing slash to merge contents rather than nesting
+        cp -r "${dir}/"* "${ROOT_DIR}/${new_dirname}/" 2>/dev/null || true
+        cp -r "${dir}/".[!.]* "${ROOT_DIR}/${new_dirname}/" 2>/dev/null || true
+    done < <(find "${SCRIPT_DIR}" -maxdepth 1 -type d -name "dot_*" -print0)
 }
 
 install_homebrew() {
@@ -219,6 +238,37 @@ install_powerline_fonts() {
     "${fonts_dir}/install.sh"
 }
 
+install_node() {
+    if command_exists node; then
+        info "Node.js already installed ($(node --version)), skipping"
+        return 0
+    fi
+
+    info "Installing Node.js (required by coc.nvim)..."
+    if ${IS_MAC}; then
+        pkg_install node
+    elif ${IS_LINUX}; then
+        # Use NodeSource for a recent LTS version
+        curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+    fi
+}
+
+setup_git_credential_helper() {
+    local gitconfig_local="${ROOT_DIR}/.gitconfig_local"
+    if [[ -f "${gitconfig_local}" ]]; then
+        info "~/.gitconfig_local already exists, skipping credential helper setup"
+        return 0
+    fi
+
+    info "Setting up git credential helper..."
+    if ${IS_MAC}; then
+        echo -e "[credential]\n    helper = osxkeychain" > "${gitconfig_local}"
+    elif ${IS_LINUX}; then
+        echo -e "[credential]\n    helper = cache --timeout=86400" > "${gitconfig_local}"
+    fi
+}
+
 install_ripgrep() {
     if command_exists rg; then
         info "ripgrep already installed, skipping"
@@ -284,6 +334,7 @@ install_apt_essentials
 
 # Install tools
 install_vim
+install_node
 install_oh_my_zsh
 install_tmux
 install_powerline_fonts
@@ -299,6 +350,9 @@ install_vim_plug
 
 # Set zsh as default shell
 set_default_shell
+
+# Configure git credential helper per platform
+setup_git_credential_helper
 
 echo ""
 info "Setup complete!"

@@ -1,8 +1,8 @@
 # Path to oh-my-zsh installation
 export ZSH=~/.oh-my-zsh
 
-# Theme
-ZSH_THEME="avit"
+# Skip theme — custom prompt defined below
+ZSH_THEME=""
 
 # Disable auto-setting terminal title (managed via tmux)
 DISABLE_AUTO_TITLE="true"
@@ -10,8 +10,8 @@ DISABLE_AUTO_TITLE="true"
 # Auto-update every 30 days
 export UPDATE_ZSH_DAYS=30
 
-# Plugins
-plugins=(tmux fzf git)
+# Plugins (fzf keybindings loaded manually at end of file)
+plugins=(tmux git)
 
 # TMUX auto-start config
 ZSH_TMUX_AUTOSTART=true
@@ -20,8 +20,12 @@ ZSH_TMUX_FIXTERM=true
 ZSH_TMUX_AUTOCONNECT=true
 ZSH_TMUX_AUTOQUIT=false
 
+# Locale
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 # PATH (deduplicated via typeset -U)
-export PATH="${HOME}/.pyenv/shims:${HOME}/bin:${HOME}/.toolbox/bin:${HOME}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
+export PATH="${HOME}/.pyenv/shims:${HOME}/bin:${HOME}/.local/bin:${HOME}/.toolbox/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
 typeset -U path
 
 # Editor
@@ -49,8 +53,10 @@ setopt AUTO_PUSHD              # Push directories on every cd
 setopt PUSHD_IGNORE_DUPS       # No duplicates in pushd stack
 setopt AUTO_CD                 # cd by typing directory name
 setopt NO_BEEP                 # No terminal bell
+setopt INTERACTIVE_COMMENTS    # Allow # comments in interactive shell
 
 DIRSTACKSIZE=20
+KEYTIMEOUT=1                   # Faster key sequence timeout (10ms)
 
 ######################### history options ############################
 setopt EXTENDED_HISTORY        # Store timestamps in history
@@ -58,6 +64,7 @@ setopt HIST_VERIFY             # Expand history before executing
 setopt INC_APPEND_HISTORY      # Write to history file immediately
 setopt HIST_FIND_NO_DUPS       # Don't show duplicates when searching history
 setopt HIST_IGNORE_ALL_DUPS    # Remove older duplicate entries
+setopt HIST_IGNORE_SPACE       # Don't save commands starting with space
 setopt NO_SHARE_HISTORY        # Don't share history between sessions
 
 HISTSIZE=50000
@@ -68,7 +75,7 @@ WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 
 ######################### completion #################################
 autoload -Uz compinit
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
 	compinit;
 else
 	compinit -C;
@@ -78,7 +85,6 @@ fi;
 bindkey "^R" history-incremental-search-backward
 bindkey "^E" end-of-line
 bindkey "^A" beginning-of-line
-bindkey "^T" push-line-or-edit
 bindkey '^P' up-line-or-history
 bindkey '^N' down-line-or-history
 
@@ -91,9 +97,16 @@ alias uuuuu='cd ../../../../../'
 alias ll='ls -lah'
 
 ######################### macOS ######################################
-if [[ $OSTYPE =~ "darwin" ]]; then
+if [[ "$OSTYPE" == darwin* ]]; then
     export CLICOLOR=1
     export LSCOLORS=gxfxcxdxcxDxDxabagacad
+
+    # Add Homebrew to PATH
+    [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    # Convert BSD LSCOLORS to GNU LS_COLORS for zsh completion menu
+    export LS_COLORS="di=36:ln=35:so=32:pi=33:ex=32:bd=1;33:cd=1;33:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+    zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
     alias gvim='open -a MacVim.app'
     alias netstat="sudo lsof -i -P"
@@ -108,7 +121,7 @@ export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ig
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 export FZF_CTRL_T_OPTS="--preview 'head -100 {}' --bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
 export FZF_DEFAULT_OPTS="--reverse --border"
-export FZF_TMUX=1
+[[ -n "$TMUX" ]] && export FZF_TMUX=1
 
 ######################### prompt #####################################
 function _user_host() {

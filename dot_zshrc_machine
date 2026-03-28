@@ -1,3 +1,85 @@
 ######################################################
 # zsh configs for current machine
 ######################################################
+
+export PATH="${HOME}/Library/Android/sdk/platform-tools:${PATH}"
+export JAVA_TOOLS_OPTIONS="-Dlog4j2.formatMsgNoLookups=true"
+
+export ARM_NONE_EABI_TOOLKIT_PATH="${HOME}/bin/gcc-arm-8-2019-q3"
+
+export BRAZIL_PLATFORM_OVERRIDE=RHEL5_64
+
+export ANDROID_HOME=${HOME}/Library/Android/sdk/
+export ANDROID_NDK_HOME=${HOME}/Library/Android/sdk/ndk-bundle/
+export TARGET_CPU=arm
+
+export ZAP_INSTALL_PATH=${HOME}/bin
+
+####################
+# Aliases
+###################
+
+alias bb="brazil-build"
+alias bc="brazil-build clean && brazil-build"
+alias bbx='brazil-build xcode-env'
+alias bwsu="brazil ws --use -p"
+alias bwsr="brazil ws --remove -p"
+alias ssh="TERM=xterm ssh"
+alias pr='cr'
+
+alias cloud='ssh -Y cloud'
+
+alias get_idf='. $HOME/workspace/esp-idf/export.sh'
+
+alias submodule_update='git submodule deinit -f --all && git submodule update --init'
+alias git_clean='git clean -dff'
+
+alias pip="pip3"
+
+########################
+# Functions
+########################
+
+update_creds() {
+    local profile="${1:-ctschung}"
+
+    local ada_creds
+    ada_creds="$(ada credentials print --profile "${profile}")"
+    export AWS_ACCESS_KEY_ID="$(echo "${ada_creds}" | jq -r '.AccessKeyId')"
+    export AWS_SECRET_ACCESS_KEY="$(echo "${ada_creds}" | jq -r '.SecretAccessKey')"
+    export AWS_SESSION_TOKEN="$(echo "${ada_creds}" | jq -r '.SessionToken')"
+}
+
+update_ingestion_service_creds() {
+    ada credentials update --account=010438490660 --provider=Conduit --role=IibsAdminAccess-DO-NOT-DELETE --profile='default' --once
+    update_creds default
+}
+
+get_long_lived_token() {
+    curl -L -c ~/.midway/cookie -b ~/.midway/cookie -H "Accept: application/json" https://iibs-midway.corp.amazon.com/GetAssumeRoleCredentials --data-urlencode "duration=43200" -G --data-urlencode "roleARN=arn:aws:iam::423908215392:role/PythonScriptRole"
+}
+
+swiftformat-dirty() {
+    git diff --diff-filter=ACM --name-only HEAD | grep '\.swift$' | xargs swiftformat --swiftversion 5.0
+}
+
+swiftformat-latest() {
+    git show --pretty=format: --name-only --diff-filter=ACM HEAD | grep '\.swift$' | xargs swiftformat --swiftversion 5.0
+}
+
+##################################################################
+# fzf-tab
+##################################################################
+
+# zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':z4h:fzf-complete' fzf-bindings 'tab:repeat' 'ctrl-a:toggle-all'
+
+##################################################################
+# Other initialization
+##################################################################
+
+# For peru development
+# https://docs.hub.amazon.dev/languages/python/peru/
+eval "$(mise activate zsh --shims)"

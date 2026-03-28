@@ -14,6 +14,7 @@ Plug 'vim-airline/vim-airline-themes'
 
 " Fuzzy completion
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 
 " Add easier tmux navigation
 Plug 'christoomey/vim-tmux-navigator'
@@ -82,13 +83,12 @@ let spell_auto_type=""              " don't automatically spell check
 let mapleader=','                   " change the leader key to be ,
 set history=1000                    " set a command history
 set hidden                          " allow for buffer to be hidden
-set visualbell                      " no sounds
-set t_vb=                           " disable visual bell flash
-set nowrap                          " turn off word wrap by default (do "set wrap" to turn it on again, or remove this line)
+set belloff=all                     " no sounds
+set nowrap                          " turn off word wrap by default
 set ignorecase                      " ignores casing by default
 set smartcase                       " only respects casing when it's used in searching
 set noequalalways                   " don't resize splits when a buffer is closed
-set backspace=2                     " use nice backspacing
+set backspace=indent,eol,start      " use nice backspacing
 set incsearch                       " turn on incremental search
 set mouse=a                         " enable the mouse at all times
 set clipboard+=unnamed              " share clipboard
@@ -98,11 +98,11 @@ set regexpengine=0                  " explicitly set the regex engine in OSX
 " ========== UI Customizations ==========
 syntax on                           " turn on syntax highlighting
 set showcmd                         " show (partial) command in status line
-set guioptions+=                    " use horizontal scrollbar
 set winminheight=0                  " min height of a split window
 set hlsearch                        " enable search highlighting
 set t_Co=256                        " set the terminal color to 256
 set laststatus=2                    " show the status line
+set noshowmode                      " airline shows mode, no need for default
 set colorcolumn=120                 " show a vertical column to indicate line limit
 set number                          " shows current line number
 
@@ -120,7 +120,6 @@ set showmatch
 set mat=2
 
 " ruler bar
-set formatoptions+=roc
 set ruler
 
 " ========== Completion Options ==========
@@ -162,7 +161,10 @@ set shiftwidth=4
 " Make diffs use vertical splits
 set diffopt+=vertical
 " auto diffupdate when diffput/diffget used
-autocmd BufWritePost * if &diff == 1 | diffupdate | endif
+augroup vimrc_diff
+    autocmd!
+    autocmd BufWritePost * if &diff == 1 | diffupdate | endif
+augroup END
 
 " ========== FZF ==========
 
@@ -203,8 +205,11 @@ inoremap <expr> <c-x><c-l> fzf#vim#complete(fzf#wrap({
 
 " ========== rip-grep =============
 
-command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-file .gitignore --ignore-file ~/.gitignore --ignore-file ~/.gitignore_global --ignore-case --hidden --follow --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
-map <C-g> :Find<SPACE><C-r><C-w><CR>
+command! -bang -nargs=* GGrep
+  \ call fzf#vim#grep(
+  \   'git grep --line-number -- '.fzf#shellescape(<q-args>),
+  \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
+map <C-g> :GGrep<SPACE><C-r><C-w><CR>
 
 " =========== Airline ==========
 
@@ -216,7 +221,7 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 
 " Check for issues with whitespaces
 let g:airline#extensions#whitespace#enabled = 1
-let g:airline#extensions#whitespace#trailing_regexp = '\s$'
+let g:airline#extensions#whitespace#trailing_regexp = '\s\+$'
 
 " UI customizations
 let g:airline_powerline_fonts = 1
@@ -330,17 +335,17 @@ nmap <leader>cl  <Plug>(coc-codelens-action)
 " ========== Mappings ==========
 
 " Map a quick jj to get out of insert mode
-imap jj <Esc>
+inoremap jj <Esc>
 
 " Search for highlighted text in visual mode by hitting //
 vnoremap <expr> // 'y/\V'.escape(@",'\').'<CR>'
 
 "map ctrl c to yank to the buffer
-map <C-c> "*y<CR>
-map <C-x> "*x<CR>
+vnoremap <C-c> "*y
+vnoremap <C-x> "*x
 
 " F8 will auto indent the whole file
-map <F8> mzgg=G`z<CR>
+nnoremap <F8> mzgg=G`z
 
 " Move to the next buffer
 nmap <leader>l :bnext<CR>
@@ -360,7 +365,7 @@ nmap <leader>bl :ls<CR>
 " Switch to buffer quickly
 nnoremap <leader>b :ls<cr>:b<space>
 
-" resize windows by default by 10 lines
+" resize windows by default by 5 lines
 nnoremap <silent> <Leader>= :exe "resize +5"<CR>
 nnoremap <silent> <Leader>- :exe "resize -5"<CR>
 nnoremap <silent> <Leader>[ :exe "vertical resize +5"<CR>
@@ -428,7 +433,10 @@ let g:ale_fix_on_save = 1
 
 " ========== File Specific Customizations ==========
 
-autocmd Filetype yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2
+augroup vimrc_filetypes
+    autocmd!
+    autocmd Filetype yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2
+augroup END
 
 " ========== Special Customizations ==========
 
@@ -437,18 +445,27 @@ let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
 
 " don't insert comment automatically on new line
-autocmd BufRead,BufNewFile * set formatoptions-=cro
+augroup vimrc_formatting
+    autocmd!
+    autocmd BufRead,BufNewFile * set formatoptions-=cro
+augroup END
 
 " match ExtraWhitespace /\s\+$\|\t/
-autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/
-autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd InsertLeave * match ExtraWhitespace /\s\+$\|\t/
+augroup vimrc_whitespace
+    autocmd!
+    autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/
+    autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+    autocmd InsertLeave * match ExtraWhitespace /\s\+$\|\t/
+augroup END
 
 " Return to last edit position when opening files
-autocmd BufReadPost *
-     \ if line("'\"") > 0 && line("'\"") <= line("$") |
-     \   exe "normal! g`\"" |
-     \ endif
+augroup vimrc_lastpos
+    autocmd!
+    autocmd BufReadPost *
+         \ if line("'\"") > 0 && line("'\"") <= line("$") |
+         \   exe "normal! g`\"" |
+         \ endif
+augroup END
 
 " highlight trailing whitespaces and also tab characters
 highlight ExtraWhitespace ctermbg=grey guibg=grey
@@ -459,39 +476,27 @@ command -bar Hexmode call ToggleHex()
 
 " helper function to toggle hex mode
 function ToggleHex()
-  " hex mode should be considered a read-only operation
-  " save values for modified and read-only for restoration later,
-  " and clear the read-only flag for now
   let l:modified=&mod
   let l:oldreadonly=&readonly
   let &readonly=0
   let l:oldmodifiable=&modifiable
   let &modifiable=1
   if !exists("b:editHex") || !b:editHex
-    " save old options
     let b:oldft=&ft
     let b:oldbin=&bin
-    " set new options
-    setlocal binary " make sure it overrides any textwidth, etc.
-    silent :e " this will reload the file without trickeries
-              "(DOS line endings will be shown entirely )
+    setlocal binary
+    silent :e
     let &ft="xxd"
-    " set status
     let b:editHex=1
-    " switch to hex editor
     %!xxd
   else
-    " restore old options
     let &ft=b:oldft
     if !b:oldbin
       setlocal nobinary
     endif
-    " set status
     let b:editHex=0
-    " return to normal editing
     %!xxd -r
   endif
-  " restore values for modified and read only state
   let &mod=l:modified
   let &readonly=l:oldreadonly
   let &modifiable=l:oldmodifiable
@@ -508,3 +513,6 @@ augroup Binary
   au BufWritePost *.bin if &bin | %!xxd
   au BufWritePost *.bin set nomod | endif
 augroup END
+
+" Don't let vim-tmux-navigator switch panes when zoomed
+let g:tmux_navigator_disable_when_zoomed = 1

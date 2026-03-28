@@ -6,6 +6,8 @@
     editor = vim
     pager = less -R
     excludesfile = ~/.gitignore_global
+    commentChar = ";"
+    autocrlf = false
 [color]
     ui = auto
 [pull]
@@ -26,6 +28,7 @@
     co = checkout
     br = branch
     lg = log --oneline --graph --decorate --all
+    dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)%an <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
     unstage = reset HEAD --
     last = log -1 HEAD --stat
     amend = commit --amend --no-edit

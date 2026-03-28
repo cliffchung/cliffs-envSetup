@@ -21,7 +21,7 @@ ZSH_TMUX_AUTOCONNECT=true
 ZSH_TMUX_AUTOQUIT=false
 
 # PATH (deduplicated via typeset -U)
-export PATH="${HOME}/bin:${HOME}/.toolbox/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
+export PATH="${HOME}/.pyenv/shims:${HOME}/bin:${HOME}/.toolbox/bin:${HOME}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
 typeset -U path
 
 # Editor
@@ -33,6 +33,10 @@ source $ZSH/oh-my-zsh.sh
 
 # Use emacs keybindings
 bindkey -e
+
+# Resource limits
+limit coredumpsize 0
+unset MAILCHECK
 
 ######################### zsh options ################################
 setopt NO_NOMATCH              # Allow globs that match nothing
@@ -52,6 +56,7 @@ DIRSTACKSIZE=20
 setopt EXTENDED_HISTORY        # Store timestamps in history
 setopt HIST_VERIFY             # Expand history before executing
 setopt INC_APPEND_HISTORY      # Write to history file immediately
+setopt HIST_FIND_NO_DUPS       # Don't show duplicates when searching history
 setopt HIST_IGNORE_ALL_DUPS    # Remove older duplicate entries
 setopt NO_SHARE_HISTORY        # Don't share history between sessions
 
@@ -82,6 +87,7 @@ alias u='cd ../'
 alias uu='cd ../../'
 alias uuu='cd ../../../'
 alias uuuu='cd ../../../../'
+alias uuuuu='cd ../../../../../'
 alias ll='ls -lah'
 
 ######################### macOS ######################################
@@ -141,16 +147,44 @@ fi
 # fzf keybindings and completion
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
-# conda (if installed)
+# Inlined brew shellenv to avoid subprocess on startup
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+export HOMEBREW_REPOSITORY="/opt/homebrew"
+fpath=("/opt/homebrew/share/zsh/site-functions" $fpath)
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
+[ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}"
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+
+# Lazy-load conda for faster shell startup
 if [[ -f "${HOME}/bin/miniconda3/bin/conda" ]]; then
-    __conda_setup="$("${HOME}/bin/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
-    if [ $? -eq 0 ]; then
-        eval "$__conda_setup"
-    else
-        [[ -f "${HOME}/bin/miniconda3/etc/profile.d/conda.sh" ]] && . "${HOME}/bin/miniconda3/etc/profile.d/conda.sh"
-    fi
-    unset __conda_setup
+    _lazy_load_conda() {
+        unset -f conda
+        if [ -f "${HOME}/bin/miniconda3/etc/profile.d/conda.sh" ]; then
+            . "${HOME}/bin/miniconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="${HOME}/bin/miniconda3/bin:$PATH"
+        fi
+    }
+    conda() { _lazy_load_conda && conda "$@"; }
 fi
+
+# Lazy-load nvm for faster shell startup
+export NVM_DIR="$HOME/.nvm"
+if [[ -d "$NVM_DIR" ]]; then
+    _lazy_load_nvm() {
+        unset -f nvm node npm npx
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+    }
+    nvm() { _lazy_load_nvm && nvm "$@"; }
+    node() { _lazy_load_nvm && node "$@"; }
+    npm() { _lazy_load_nvm && npm "$@"; }
+    npx() { _lazy_load_nvm && npx "$@"; }
+fi
+
+# Source local bin env (if installed)
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
 
 # zsh-syntax-highlighting (must be last)
 if [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then

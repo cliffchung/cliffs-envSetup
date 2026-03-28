@@ -24,6 +24,11 @@ ZSH_TMUX_AUTOQUIT=false
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# Homebrew (must be before oh-my-zsh so plugins like tmux can find brew-installed binaries)
+if [[ "$OSTYPE" == darwin* ]]; then
+    [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # PATH (deduplicated via typeset -U)
 export PATH="${HOME}/.pyenv/shims:${HOME}/bin:${HOME}/.local/bin:${HOME}/.toolbox/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${HOME}/.cargo/bin:${PATH}"
 typeset -U path
@@ -101,9 +106,6 @@ if [[ "$OSTYPE" == darwin* ]]; then
     export CLICOLOR=1
     export LSCOLORS=gxfxcxdxcxDxDxabagacad
 
-    # Add Homebrew to PATH
-    [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-
     # Convert BSD LSCOLORS to GNU LS_COLORS for zsh completion menu
     export LS_COLORS="di=36:ln=35:so=32:pi=33:ex=32:bd=1;33:cd=1;33:su=30;41:sg=30;46:tw=30;42:ow=30;43"
     zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -137,10 +139,8 @@ function _user_host() {
 }
 
 typeset +H _current_dir="%{$fg_bold[blue]%}%3~%{$reset_color%} "
-typeset +H _return_status="%{$fg_bold[red]%}%(?..⍉)%{$reset_color%}"
-
 PROMPT='
-$(_user_host)${_current_dir}${_return_status}
+$(_user_host)${_current_dir}
 %{%(!.%F{red}.%F{white})%}>%{$reset_color%} '
 
 PROMPT2='%{%(!.%F{red}.%F{white})%}<%{$reset_color%} '

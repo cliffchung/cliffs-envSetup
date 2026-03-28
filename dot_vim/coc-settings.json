@@ -1,4 +1,7 @@
 {
+  "coc.preferences.node": "/Users/cliffchung/bin/node",
+  "coc.preferences.silentAutoupdate": true,
+  "notification.disabledProgressSources": ["*"],
   "suggest.noselect": true,
   "suggest.enablePreselect": false,
   "suggest.triggerAfterInsertEnter": false,

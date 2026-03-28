@@ -93,6 +93,13 @@ bindkey "^A" beginning-of-line
 bindkey '^P' up-line-or-history
 bindkey '^N' down-line-or-history
 
+# Word navigation (Ctrl+Left / Ctrl+Right)
+bindkey '^[[1;5D' backward-word
+bindkey '^[[1;5C' forward-word
+# Alt+Left / Alt+Right (iTerm2 default)
+bindkey '^[b' backward-word
+bindkey '^[f' forward-word
+
 ######################### aliases ####################################
 alias u='cd ../'
 alias uu='cd ../../'

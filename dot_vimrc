@@ -282,6 +282,7 @@ nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation
 nmap <silent> gd <Plug>(coc-definition)
+nnoremap <silent> <C-]> :call CocActionAsync('jumpDefinition')<CR>
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
@@ -438,6 +439,7 @@ let g:ale_fix_on_save = 1
 augroup vimrc_filetypes
     autocmd!
     autocmd Filetype yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2
+    autocmd Filetype markdown,text,gitcommit let b:coc_suggest_disable = 1
 augroup END
 
 " ========== Special Customizations ==========

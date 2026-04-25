@@ -203,6 +203,15 @@ if [[ -d "$NVM_DIR" ]]; then
     npx() { _lazy_load_nvm && npx "$@"; }
 fi
 
+# Add default node version's bin to PATH so global npm CLIs (firebase, etc.)
+# are available without triggering the full nvm load.
+if [[ -d "$NVM_DIR" && -f "$NVM_DIR/alias/default" ]]; then
+    _nvm_default=$(<"$NVM_DIR/alias/default")
+    _nvm_bin_dirs=($NVM_DIR/versions/node/v${_nvm_default#v}*/bin(N))
+    (( ${#_nvm_bin_dirs} )) && export PATH="${_nvm_bin_dirs[-1]}:$PATH"
+    unset _nvm_default _nvm_bin_dirs
+fi
+
 # Source local bin env (if installed)
 [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
 

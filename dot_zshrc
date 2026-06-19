@@ -129,8 +129,15 @@ fi
 export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 export FZF_CTRL_T_OPTS="--preview 'head -100 {}' --bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
-export FZF_DEFAULT_OPTS="--reverse --border"
-[[ -n "$TMUX" ]] && export FZF_TMUX=1
+# --height opens fzf inline as a strip below the prompt instead of a
+# floating tmux popup -- it never covers scrollback or other panes, opens
+# instantly, and doesn't drop/reorder keystrokes. --min-height keeps it
+# usable in short windows. (Drop --height + add `--tmux center,60%` to go
+# back to a floating popup.)
+export FZF_DEFAULT_OPTS="--reverse --border --height 40% --min-height 12"
+# FZF_TMUX=1 used the slow fzf-tmux wrapper that spawned a new pane on
+# every Ctrl+R, causing a startup delay and dropped/reordered keystrokes.
+export FZF_TMUX=0
 
 ######################### prompt #####################################
 function _user_host() {
@@ -164,8 +171,15 @@ fi
 # Machine-specific overrides
 [[ -f ~/.zshrc_machine ]] && source ~/.zshrc_machine
 
-# fzf keybindings and completion
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+# fzf keybindings and completion.
+# Prefer fzf's built-in integration (fzf >= 0.48) so it stays correct across
+# `brew upgrade fzf` -- the generated ~/.fzf.zsh pins a versioned Cellar path
+# that breaks on upgrade. Fall back to ~/.fzf.zsh only for older fzf.
+if command -v fzf >/dev/null 2>&1 && fzf --zsh >/dev/null 2>&1; then
+  source <(fzf --zsh)
+elif [[ -f ~/.fzf.zsh ]]; then
+  source ~/.fzf.zsh
+fi
 
 # Inlined brew shellenv to avoid subprocess on startup
 export HOMEBREW_PREFIX="/opt/homebrew"

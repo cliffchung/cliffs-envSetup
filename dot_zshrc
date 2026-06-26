@@ -128,7 +128,13 @@ fi
 ######################### fzf ########################################
 export FZF_DEFAULT_COMMAND='rg --files --smart-case --follow --ignore-file ~/.ignore --ignore-file .gitignore --ignore-file ~/.gitignore_global 2> /dev/null'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
-export FZF_CTRL_T_OPTS="--preview 'head -100 {}' --bind 'ctrl-v:execute(tmux send-keys -t .- \"vim {}\" Enter)+abort'"
+# ctrl-v opens the selection in vim. fzf now runs inline in the current pane
+# (FZF_TMUX=0 + --height), so run vim directly in this terminal -- the old
+# `tmux send-keys -t .-` targeted the last-active pane, which was correct when
+# fzf had its own popup pane but now lands vim in the wrong pane.
+# In --height mode fzf's child stdio isn't the terminal ("Output is not to a
+# terminal"), so vim must be pointed at /dev/tty explicitly.
+export FZF_CTRL_T_OPTS="--preview 'head -100 {}' --bind 'ctrl-v:become(vim {} < /dev/tty > /dev/tty)'"
 # --height opens fzf inline as a strip below the prompt instead of a
 # floating tmux popup -- it never covers scrollback or other panes, opens
 # instantly, and doesn't drop/reorder keystrokes. --min-height keeps it
